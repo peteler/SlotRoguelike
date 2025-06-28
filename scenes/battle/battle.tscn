@@ -1,0 +1,76 @@
+[gd_scene load_steps=5 format=3 uid="uid://dfmamdho0d2x"]
+
+[ext_resource type="PackedScene" uid="uid://blauch4vbu0ji" path="res://scenes/battle/Player/player_character.tscn" id="1_ffvsa"]
+[ext_resource type="Script" uid="uid://toxqvsk2r35c" path="res://scenes/battle/battle_manager.gd" id="1_xd4uy"]
+[ext_resource type="PackedScene" uid="uid://k0eru0jyth8d" path="res://scenes/battle/SlotMachine/slot_machine.tscn" id="2_ffvsa"]
+[ext_resource type="PackedScene" uid="uid://bjo62yv2doddw" path="res://scenes/battle/Enemies/enemy.tscn" id="3_0yh6x"]
+
+[node name="Battle" type="Node2D"]
+
+[node name="BattleManager" type="Node2D" parent="."]
+script = ExtResource("1_xd4uy")
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.3956, 0.415093, 0.43, 1)
+metadata/_edit_lock_ = true
+
+[node name="Characters" type="Node2D" parent="."]
+
+[node name="PlayerCharacter" parent="Characters" groups=["player_character"] instance=ExtResource("1_ffvsa")]
+position = Vector2(0, 24)
+
+[node name="Enemies" type="Node2D" parent="Characters"]
+
+[node name="enemy" parent="Characters/Enemies" instance=ExtResource("3_0yh6x")]
+position = Vector2(816, 245)
+
+[node name="UI" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="SlotMachine" parent="UI" instance=ExtResource("2_ffvsa")]
+offset_left = 25.0
+offset_top = 25.0
+offset_right = -564.0
+offset_bottom = -442.0
+
+[node name="SpellsPanel" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="ManaLabel" type="Label" parent="UI/SpellsPanel"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="Spells" type="HBoxContainer" parent="UI/SpellsPanel"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Equipment" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="AttackButton" type="Button" parent="UI"]
+offset_left = 374.0
+offset_top = 378.0
+offset_right = 432.0
+offset_bottom = 409.0
+text = "Attack"
+
+[node name="EndTurnButton" type="Button" parent="UI"]
+offset_left = 738.0
+offset_top = 472.0
+offset_right = 816.0
+offset_bottom = 503.0
+text = "End Turn
+"

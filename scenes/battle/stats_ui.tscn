@@ -1,0 +1,32 @@
+[gd_scene load_steps=2 format=3 uid="uid://dk4pjn07mwphr"]
+
+[ext_resource type="Script" uid="uid://dgjtdqggreyd1" path="res://scenes/battle/stats_ui.gd" id="1_6l4ln"]
+
+[node name="StatsUI" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 221.0
+offset_top = 255.0
+offset_right = 261.0
+offset_bottom = 295.0
+script = ExtResource("1_6l4ln")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+metadata/_edit_lock_ = true
+
+[node name="BlockLabel" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+text = "2"
+
+[node name="TransparentSeperator" type="ColorRect" parent="HBoxContainer"]
+custom_minimum_size = Vector2(20, 0)
+layout_mode = 2
+color = Color(1, 1, 1, 0)
+metadata/_edit_lock_ = true
+
+[node name="AttackLabel" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+text = "4"
