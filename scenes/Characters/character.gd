@@ -63,6 +63,21 @@ func add_block(amount: int):
 func heal(amount: int):
 	self.current_health += amount
 
+func modify_health(amount: int):
+	if amount > 0:
+		heal(amount)
+	else:
+		take_damage(-amount)
+
+func modify_attack(amount: int):
+	self.attack += amount
+	emit_signal("attack_updated", self.attack)
+
+
+func modify_block(amount: int):
+	add_block(amount)
+	emit_signal("block_updated", self.block)
+
 # --- Targeting Logic (moved from Enemy.gd) ---
 
 func _on_input_event(viewport, event, shape_idx):

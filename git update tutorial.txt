@@ -1,0 +1,16 @@
+commands in order:
+
+
+cd C:/Users/palis/Documents/slots-spells-strikes
+
+git add . (Stage changes)
+
+git commit -m "Your descriptive message" (Create local snapshot)
+
+git push (Sync local snapshots to GitHub)
+
+
+
+repo link:
+
+https://github.com/peteler/SlotRoguelike

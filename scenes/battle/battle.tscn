@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://dfmamdho0d2x"]
+[gd_scene load_steps=6 format=3 uid="uid://dfmamdho0d2x"]
 
-[ext_resource type="PackedScene" uid="uid://blauch4vbu0ji" path="res://scenes/battle/Player/player_character.tscn" id="1_ffvsa"]
 [ext_resource type="Script" uid="uid://toxqvsk2r35c" path="res://scenes/battle/battle_manager.gd" id="1_xd4uy"]
 [ext_resource type="PackedScene" uid="uid://k0eru0jyth8d" path="res://scenes/battle/SlotMachine/slot_machine.tscn" id="2_ffvsa"]
-[ext_resource type="PackedScene" uid="uid://bjo62yv2doddw" path="res://scenes/battle/Enemies/enemy.tscn" id="3_0yh6x"]
+[ext_resource type="PackedScene" uid="uid://bjo62yv2doddw" path="res://scenes/Characters/Enemies/enemy.tscn" id="3_0yh6x"]
+[ext_resource type="PackedScene" uid="uid://dvbx04ecwkatj" path="res://scenes/Characters/Player/player_character.tscn" id="3_h0kxc"]
+[ext_resource type="Script" uid="uid://cwypjm2n71a1n" path="res://scenes/Characters/Player/player_character.gd" id="4_fh7rg"]
 
 [node name="Battle" type="Node2D"]
 
@@ -21,13 +22,14 @@ metadata/_edit_lock_ = true
 
 [node name="Characters" type="Node2D" parent="."]
 
-[node name="PlayerCharacter" parent="Characters" groups=["player_character"] instance=ExtResource("1_ffvsa")]
-position = Vector2(0, 24)
-
 [node name="Enemies" type="Node2D" parent="Characters"]
 
 [node name="enemy" parent="Characters/Enemies" instance=ExtResource("3_0yh6x")]
 position = Vector2(816, 245)
+
+[node name="PlayerCharacter" parent="Characters" instance=ExtResource("3_h0kxc")]
+position = Vector2(279, 371)
+script = ExtResource("4_fh7rg")
 
 [node name="UI" type="CanvasLayer" parent="."]
 layer = -1
