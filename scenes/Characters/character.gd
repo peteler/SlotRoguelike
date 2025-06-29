@@ -9,18 +9,9 @@ signal targeted(character)
 signal health_updated(current_health, max_health)
 signal block_updated(block_amount)
 signal attack_updated(attack_amount)
-signal died
-
-## Signals for BattleManager to listen to
-# Character.gd additions
-signal turn_started
-signal turn_ended
-
-## variables
-var is_my_turn: bool = false
+signal died ## also for BattleManager to listen to
 
 @export var max_health: int = 100
-
 
 var current_health: int:
 	set(value):
@@ -75,17 +66,3 @@ func _on_input_event(viewport, event, shape_idx):
 		print("self: ", self)
 		# Let any listener (like the BattleManager) know this character was clicked.
 		emit_signal("targeted", self)
-
-# --- Start/End turn Logic ---
-
-func start_turn():
-	is_my_turn = true
-	emit_signal("turn_started")
-	# Player: Enable UI, Enemy: Start AI
-
-func end_turn():
-	is_my_turn = false
-	# Reset temporary resources
-	block = 0
-	emit_signal("turn_ended")
-	

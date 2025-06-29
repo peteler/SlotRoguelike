@@ -25,19 +25,25 @@ var enemies: Array # enemies_container.get_children()
 
 # UI Node References
 @onready var slot_machine = $/root/Battle/UI/SlotMachine
-@onready  var roll_button = $/root/Battle/UI/SlotMachine/RollButton
+@onready var roll_button = $/root/Battle/UI/SlotMachine/RollButton
 @onready var attack_button = $/root/Battle/UI/AttackButton
 @onready var end_turn_button = $/root/Battle/UI/EndTurnButton
+
 # @onready var spell_panel = get_node("/root/Battle/UI/SpellPanel") # For later
 
-# general flags
-var player_attacked_flag = false
+# classes [structs]
+class PlayerStatus:
+	var has_attacked: bool = false
+var player_status: PlayerStatus
 
 func _ready():
 	# Get references to the characters
 	player_character = get_tree().get_first_node_in_group("player_character")
 	enemies_container = get_tree().get_first_node_in_group("enemies_container")
 	enemies = enemies_container.get_children()
+	
+	# init structs
+	player_status = PlayerStatus.new() 
 
 	# Connect signals from UI elements to our manager's functions.
 	slot_machine.roll_completed.connect(_on_slot_roll_completed)
@@ -64,7 +70,7 @@ func _on_enemy_targeted(enemy_node: Area2D):
 		TargetingMode.ATTACK:
 			handle_attack_targeting(enemy_node)
 			# Disable attack for this turn
-			player_attacked_flag = true
+			player_status.has_attacked = true
 		TargetingMode.SPELL:
 			handle_spell_targeting(enemy_node)
 	
@@ -105,10 +111,9 @@ func _on_end_turn_button_pressed():
 	
 	# The player ends their turn, so we move to the enemy's turn.
 	enter_state(State.ENEMY_TURN)
-
+# --------------------------------------------------
 
 # --- state management functions ---
-
 func enter_state(new_state: State):
 	
 	current_state = new_state
@@ -131,7 +136,7 @@ func enter_state(new_state: State):
 			# The player has rolled, now they can act.
 			# Disable roll, enable actions.
 			roll_button.disabled = true
-			attack_button.disabled = (player_character.attack <= 0) or player_attacked_flag
+			attack_button.disabled = (player_character.attack <= 0) or player_status.has_attacked
 			end_turn_button.disabled = false
 			# spell_panel.show() # for later
 
@@ -178,13 +183,14 @@ func start_spell_targeting(spell: Spell):
 	# TODO: Highlight valid targets
 
 func init_player_start_of_turn():
-	player_attacked_flag = false
+	player_status.has_attacked = false
 	player_character.attack = 0
 	player_character.block = 0
 
 # TODO: setup enemy intent system
 func init_enemy_start_of_turn():
 	pass
+# --------------------------------------------------
 
 # --- combat helper functions ---
 
@@ -199,6 +205,7 @@ func handle_spell_targeting(target):
 	if current_spell:
 		current_spell.execute(target)
 		# Deduct mana cost would go here
+# --------------------------------------------------
 
 # --- symbol interaction functions ---
 
@@ -283,3 +290,4 @@ func _apply_symbol_to_target(symbol: SymbolData, target: Node):
 			effect_instance.apply_effect(symbol, target)
 
 	emit_signal("symbol_effect_applied", symbol, target)
+# --------------------------------------------------

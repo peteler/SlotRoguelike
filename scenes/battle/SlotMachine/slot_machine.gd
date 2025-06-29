@@ -1,4 +1,5 @@
 # SlotMachine.gd
+class_name SlotMachine
 extends Control
 
 ## Signal emitted when the roll is finished.
