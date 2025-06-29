@@ -37,7 +37,7 @@ var turn_order: Array[Enemy] = []
 var current_turn_index: int = 0
 
 # Spawn points container
-@onready var spawn_points: Node = get_node_or_null("SpawnPoints")
+@onready var spawn_points: Node = $/root/Battle/SpawnPoints
 
 ## Characters
 var player_character: PlayerCharacter # We'll assign this in _ready()

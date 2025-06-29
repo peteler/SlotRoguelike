@@ -79,9 +79,9 @@ offset_bottom = 409.0
 text = "Attack"
 
 [node name="EndTurnButton" type="Button" parent="UI"]
-offset_left = 738.0
-offset_top = 472.0
-offset_right = 816.0
-offset_bottom = 503.0
+offset_left = 976.0
+offset_top = 490.0
+offset_right = 1054.0
+offset_bottom = 521.0
 text = "End Turn
 "
