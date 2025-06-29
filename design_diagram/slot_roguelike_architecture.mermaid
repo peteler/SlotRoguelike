@@ -1,0 +1,113 @@
+graph TB
+    subgraph "Main Game Scenes"
+        Battle[Battle Scene<br/>📁 Main Game Loop]
+        Menu[Menu Scene<br/>🎮 Navigation]
+        Shop[Shop Scene<br/>🛒 Upgrades]
+    end
+
+    subgraph "Battle Scene Hierarchy"
+        Battle --> BM[BattleManager<br/>🎯 Core State Controller]
+        Battle --> UI[UI Container<br/>🖥️ User Interface]
+        Battle --> World[World Container<br/>🌍 Game Objects]
+        
+        UI --> SM[SlotMachine<br/>🎰 Roll System]
+        UI --> ActionPanel[Action Panel<br/>⚔️ Combat Controls]
+        UI --> StatsDisplay[Stats Display<br/>📊 Current Stats]
+        
+        SM --> SlotContainer[Slot Container<br/>📦 HBoxContainer]
+        SM --> RollBtn[Roll Button<br/>🎲 Trigger Roll]
+        SlotContainer --> Slot1[Slot Instance<br/>🎯 Individual Slot]
+        SlotContainer --> Slot2[Slot Instance<br/>🎯 Individual Slot]
+        SlotContainer --> SlotN[Slot Instance...<br/>🎯 Dynamic Count]
+        
+        ActionPanel --> AttackBtn[Attack Button<br/>⚔️ Direct Attack]
+        ActionPanel --> SpellPanel[Spell Panel<br/>✨ Magic Actions]
+        ActionPanel --> EndTurnBtn[End Turn Button<br/>⏭️ Finish Turn]
+        
+        World --> PlayerChar[Player Character<br/>🛡️ Knight/Hero]
+        World --> EnemyContainer[Enemy Container<br/>👹 All Enemies]
+        EnemyContainer --> Enemy1[Enemy Instance<br/>🐉 AI Opponent]
+        EnemyContainer --> Enemy2[Enemy Instance<br/>🐉 AI Opponent]
+    end
+
+    subgraph "Individual Slot Scene"
+        SlotScene[Slot.tscn<br/>🎯 Reusable Component]
+        SlotScene --> SlotControl[Control Node<br/>📦 Root Container]
+        SlotControl --> PanelContainer[Panel Container<br/>🖼️ Visual Frame]
+        PanelContainer --> TextureRect[Texture Rect<br/>🖼️ Symbol Display]
+        SlotScene --> SlotScript[Slot.gd<br/>📝 Symbol Management]
+    end
+
+    subgraph "Character Scene Template"
+        CharScene[Character.tscn<br/>👤 Base Template]
+        CharScene --> CharArea[Area2D<br/>🎯 Targeting & Collision]
+        CharScene --> CharSprite[Sprite2D<br/>🖼️ Visual Representation]
+        CharScene --> CharUI[Character UI<br/>📊 Health/Stats Display]
+        CharScene --> CharScript[Character.gd<br/>📝 Base Logic]
+        
+        PlayerChar -.->|inherits| CharScene
+        Enemy1 -.->|inherits| CharScene
+    end
+
+    subgraph "Data Systems & Resources"
+        SymbolData[SymbolData.tres<br/>📄 Symbol Definitions]
+        SymbolPool[SymbolPool.gd<br/>🎲 Finite Pool Manager]
+        SpellData[Spell Resources<br/>✨ Magic Definitions]
+        CharStats[Character Stats<br/>📊 Progression Data]
+    end
+
+    subgraph "Core System Scripts"
+        BM --> StateManager{State Machine<br/>🔄 Turn Flow}
+        BM --> TargetSystem[Targeting System<br/>🎯 Selection Logic]
+        BM --> CombatResolver[Combat Resolver<br/>⚔️ Damage Calculation]
+        
+        SM --> SymbolPool
+        SM --> RollLogic[Roll Logic<br/>🎰 Sequential Processing]
+        
+        StateManager --> PlayerRoll[PLAYER_ROLL<br/>🎲 Awaiting Roll]
+        StateManager --> PlayerAction[PLAYER_ACTION<br/>⚔️ Choose Action]
+        StateManager --> PlayerTarget[PLAYER_TARGETING<br/>🎯 Select Target]
+        StateManager --> EnemyTurn[ENEMY_TURN<br/>🤖 AI Processing]
+        StateManager --> BattleEnd[BATTLE_END<br/>🏆 Victory/Defeat]
+    end
+
+    subgraph "Signal Flow Architecture"
+        direction LR
+        SignalEmitters[Signal Emitters<br/>📡 Event Sources]
+        SignalReceivers[Signal Receivers<br/>📻 Event Handlers]
+        
+        SignalEmitters --> |roll_completed| SM
+        SignalEmitters --> |targeted| PlayerChar
+        SignalEmitters --> |health_updated| CharUI
+        SignalEmitters --> |button_pressed| ActionPanel
+        
+        SignalReceivers --> |_on_roll_completed| BM
+        SignalReceivers --> |_on_enemy_targeted| BM
+        SignalReceivers --> |_on_health_changed| StatsDisplay
+        SignalReceivers --> |_on_action_selected| BM
+    end
+
+    subgraph "Future Expansion Areas"
+        EquipSystem[Equipment System<br/>⚔️ Gear & Items]
+        ProgressSystem[Progression System<br/>📈 Unlocks & Upgrades]
+        SaveSystem[Save System<br/>💾 Persistence]
+        AudioSystem[Audio System<br/>🔊 Sound & Music]
+        EffectSystem[Effect System<br/>✨ Animations & VFX]
+        
+        EquipSystem -.->|enhances| PlayerChar
+        ProgressSystem -.->|modifies| SymbolPool
+        SaveSystem -.->|persists| CharStats
+    end
+
+    %% Styling
+    classDef sceneNode fill:#e1f5fe,stroke:#0277bd,stroke-width:2px
+    classDef systemNode fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef dataNode fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+    classDef uiNode fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    classDef futureNode fill:#fce4ec,stroke:#c2185b,stroke-width:2px,stroke-dasharray: 5 5
+
+    class Battle,Menu,Shop,CharScene,SlotScene sceneNode
+    class BM,StateManager,TargetSystem,CombatResolver,RollLogic systemNode
+    class SymbolData,SymbolPool,SpellData,CharStats dataNode
+    class UI,SM,ActionPanel,StatsDisplay,SlotContainer uiNode
+    class EquipSystem,ProgressSystem,SaveSystem,AudioSystem,EffectSystem futureNode

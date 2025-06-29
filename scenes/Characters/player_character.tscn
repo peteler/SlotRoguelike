@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://dvbx04ecwkatj"]
 
-[ext_resource type="PackedScene" uid="uid://4tktukaaogag" path="res://scenes/Characters/character.tscn" id="1_soqk2"]
+[ext_resource type="PackedScene" uid="uid://4tktukaaogag" path="res://scenes/characters/character.tscn" id="1_soqk2"]
 [ext_resource type="Texture2D" uid="uid://df4g1o71vmqrl" path="res://assets/Knight.png" id="2_uxe4s"]
 
 [node name="PlayerCharacter" instance=ExtResource("1_soqk2")]

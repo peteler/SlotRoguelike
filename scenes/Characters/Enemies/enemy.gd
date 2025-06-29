@@ -1,2 +1,0 @@
-# Enemy.gd
-extends Character

@@ -2,14 +2,15 @@
 
 [ext_resource type="Script" uid="uid://toxqvsk2r35c" path="res://scenes/battle/battle_manager.gd" id="1_xd4uy"]
 [ext_resource type="PackedScene" uid="uid://k0eru0jyth8d" path="res://scenes/battle/SlotMachine/slot_machine.tscn" id="2_ffvsa"]
-[ext_resource type="PackedScene" uid="uid://bjo62yv2doddw" path="res://scenes/Characters/Enemies/enemy.tscn" id="3_0yh6x"]
-[ext_resource type="PackedScene" uid="uid://dvbx04ecwkatj" path="res://scenes/Characters/Player/player_character.tscn" id="3_h0kxc"]
-[ext_resource type="Script" uid="uid://cwypjm2n71a1n" path="res://scenes/Characters/Player/player_character.gd" id="4_fh7rg"]
+[ext_resource type="Resource" uid="uid://b7piwl53m72hw" path="res://custom_resources/encounters/test_encounter.tres" id="2_fh7rg"]
+[ext_resource type="PackedScene" uid="uid://dvbx04ecwkatj" path="res://scenes/characters/player_character.tscn" id="3_h0kxc"]
+[ext_resource type="Script" uid="uid://cwypjm2n71a1n" path="res://scenes/characters/player_character.gd" id="4_fh7rg"]
 
 [node name="Battle" type="Node2D"]
 
 [node name="BattleManager" type="Node2D" parent="."]
 script = ExtResource("1_xd4uy")
+current_encounter = ExtResource("2_fh7rg")
 
 [node name="Background" type="ColorRect" parent="."]
 anchors_preset = 15
@@ -20,12 +21,20 @@ grow_vertical = 2
 color = Color(0.3956, 0.415093, 0.43, 1)
 metadata/_edit_lock_ = true
 
+[node name="SpawnPoints" type="Node2D" parent="."]
+
+[node name="Left" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(680, 425)
+
+[node name="mid" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(845, 415)
+
+[node name="right" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(1000, 425)
+
 [node name="Characters" type="Node2D" parent="."]
 
 [node name="Enemies" type="Node2D" parent="Characters" groups=["enemies_container"]]
-
-[node name="enemy" parent="Characters/Enemies" instance=ExtResource("3_0yh6x")]
-position = Vector2(816, 245)
 
 [node name="PlayerCharacter" parent="Characters" groups=["player_character"] instance=ExtResource("3_h0kxc")]
 position = Vector2(279, 371)

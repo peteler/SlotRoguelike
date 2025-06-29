@@ -61,7 +61,7 @@ func modify_block(amount: int):
 
 # --- Targeting Logic (moved from Enemy.gd) ---
 
-func _on_input_event(viewport, event, shape_idx):
+func _on_input_event(_viewport, event, _shape_idx):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed():
 		print("self: ", self)
 		# Let any listener (like the BattleManager) know this character was clicked.

@@ -1,6 +1,7 @@
 # BattleManager.gd
 extends Node
 
+## States
 # Define the possible states for our battle flow.
 enum State {
 	BATTLE_START,
@@ -19,17 +20,29 @@ enum TargetingMode { NONE, ATTACK, SPELL }
 var current_state: State
 var current_targeting_mode := TargetingMode.NONE
 var current_spell: Spell
-var player_character: PlayerCharacter # We'll assign this in _ready()
-var enemies_container: Node # The parent node holding all enemy scenes
-var enemies: Array # enemies_container.get_children()
 
-# UI Node References
+
+## UI Node References
 @onready var slot_machine = $/root/Battle/UI/SlotMachine
 @onready var roll_button = $/root/Battle/UI/SlotMachine/RollButton
 @onready var attack_button = $/root/Battle/UI/AttackButton
 @onready var end_turn_button = $/root/Battle/UI/EndTurnButton
 
-# @onready var spell_panel = get_node("/root/Battle/UI/SpellPanel") # For later
+## Encounter Management
+@export var current_encounter: EncounterData
+@export var enemy_scene: PackedScene = preload("res://scenes/characters/enemy.tscn")
+
+# Turn order management
+var turn_order: Array[Enemy] = []
+var current_turn_index: int = 0
+
+# Spawn points container
+@onready var spawn_points: Node = get_node_or_null("SpawnPoints")
+
+## Characters
+var player_character: PlayerCharacter # We'll assign this in _ready()
+var enemies_container: Node # The parent node holding all enemy scenes
+var enemies: Array # enemies_container.get_children()
 
 # classes [structs]
 class PlayerStatus:
@@ -40,20 +53,22 @@ func _ready():
 	# Get references to the characters
 	player_character = get_tree().get_first_node_in_group("player_character")
 	enemies_container = get_tree().get_first_node_in_group("enemies_container")
-	enemies = enemies_container.get_children()
+	
+	# Load encounter if set
+	if current_encounter:
+		setup_encounter(current_encounter)
+	else:
+		push_warning("No encounter data set for BattleManager")
 	
 	# init structs
 	player_status = PlayerStatus.new() 
 
-	# Connect signals from UI elements to our manager's functions.
+	# Connect signals from UI elements to our manager's functions 
+	# TODO: replace this with a function that loads ui
 	slot_machine.roll_completed.connect(_on_slot_roll_completed)
 	attack_button.pressed.connect(_on_attack_button_pressed)
 	end_turn_button.pressed.connect(_on_end_turn_button_pressed)
 	
-	# Connect to the targeted signal for each enemy
-	for enemy in enemies_container.get_children():
-		enemy.targeted.connect(_on_enemy_targeted)
-		
 	# Start the battle
 	enter_state(State.PLAYER_ROLL)
 
@@ -76,6 +91,10 @@ func _on_enemy_targeted(enemy_node: Area2D):
 	
 	# Clean up targeting state
 	end_targeting()
+
+#TODO:
+func _on_enemy_died(enemy_node: Area2D):
+	pass
 
 func _on_slot_roll_completed(symbols: Array):
 	# This is called when the SlotMachine is done rolling.
@@ -147,13 +166,14 @@ func enter_state(new_state: State):
 			# TODO: Add a visual indicator for targeting mode (e.g., change cursor)
 			
 		State.ENEMY_TURN:
-			# Disable all player controls.
+			# Disable all player controls
 			attack_button.disabled = true
 			end_turn_button.disabled = true
-			# We'll implement the enemy's logic here later.
-			# For now, we'll just go back to the player's turn.
-			await get_tree().create_timer(1.0).timeout # Simulate enemy thinking
-			print("Enemy turn ends.")
+			
+			# Execute enemy turns using turn order
+			await execute_enemy_turns()
+			
+			# Return to player turn
 			enter_state(State.PLAYER_ROLL)
 
 # End targeting mode
@@ -291,3 +311,205 @@ func _apply_symbol_to_target(symbol: SymbolData, target: Node):
 
 	emit_signal("symbol_effect_applied", symbol, target)
 # --------------------------------------------------
+
+# --- Encounter Management ---
+
+func setup_encounter(encounter_data: EncounterData):
+	"""Set up the battle from encounter data"""
+	current_encounter = encounter_data
+	
+	# Clear any existing enemies
+	clear_enemies()
+	
+	# Spawn enemies from encounter data
+	spawn_enemies_from_encounter()
+	
+	# Setup turn order
+	setup_turn_order()
+	
+	# Update enemies array
+	enemies = enemies_container.get_children()
+	
+	# Connect signals
+	connect_enemy_signals()
+
+func spawn_enemies_from_encounter():
+	"""Spawn all enemies defined in the encounter"""
+	if not current_encounter:
+		push_error("No encounter data available")
+		return
+	
+	for enemy_spawn in current_encounter.enemy_spawns:
+		var enemy_instance = create_enemy_from_spawn(enemy_spawn)
+		if enemy_instance:
+			enemies_container.add_child(enemy_instance)
+
+func create_enemy_from_spawn(enemy_spawn: EnemySpawn) -> Enemy:
+	"""Create an enemy instance from spawn configuration"""
+	if not enemy_scene or not enemy_spawn.enemy_data:
+		push_error("Missing enemy scene or enemy data")
+		return null
+	
+	# Create enemy instance
+	var enemy_instance = enemy_scene.instantiate() as Enemy
+	if not enemy_instance:
+		push_error("Failed to instantiate enemy scene")
+		return null
+	
+	# Set basic data
+	enemy_instance.enemy_data = enemy_spawn.enemy_data
+	
+	# Apply position
+	var spawn_position = get_spawn_position(enemy_spawn)
+	enemy_instance.global_position = spawn_position
+	
+	# Apply modifiers
+	apply_spawn_modifiers(enemy_instance, enemy_spawn)
+	
+	return enemy_instance
+
+func get_spawn_position(enemy_spawn: EnemySpawn) -> Vector2:
+	"""Get the world position for an enemy spawn"""
+	var base_position = Vector2.ZERO
+	
+	# Try to find spawn point by name
+	if not enemy_spawn.spawn_point_name.is_empty() and spawn_points:
+		var spawn_point = spawn_points.get_node_or_null(enemy_spawn.spawn_point_name)
+		if spawn_point and spawn_point is Marker2D:
+			base_position = spawn_point.global_position
+		else:
+			push_warning("Spawn point '" + enemy_spawn.spawn_point_name + "' not found")
+			base_position = get_default_spawn_position()
+	else:
+		base_position = get_default_spawn_position()
+	
+	# Apply additional offset
+	return base_position + enemy_spawn.spawn_offset
+
+func get_default_spawn_position() -> Vector2:
+	"""Fallback position when no spawn point is specified"""
+	return Vector2(600, 300)  # Adjust to your game's layout
+
+func apply_spawn_modifiers(enemy: Enemy, spawn_config: EnemySpawn):
+	"""Apply spawn-specific modifiers to an enemy"""
+	# Apply health modifier
+	if spawn_config.health_multiplier != 1.0:
+		enemy.max_health = int(enemy.max_health * spawn_config.health_multiplier)
+		enemy.current_health = enemy.max_health
+	
+	# Apply attack modifier (modify the enemy data's base attack)
+	if spawn_config.attack_multiplier != 1.0 and enemy.enemy_data:
+		enemy.enemy_data.base_attack = int(enemy.enemy_data.base_attack * spawn_config.attack_multiplier)
+	
+	# Add extra actions
+	if not spawn_config.give_extra_actions.is_empty():
+		enemy.enemy_data.possible_actions.append_array(spawn_config.give_extra_actions)
+
+# --- Turn Order System ---
+
+func setup_turn_order():
+	"""Establish the turn order for this encounter"""
+	var spawned_enemies = enemies_container.get_children()
+	
+	if current_encounter.use_custom_turn_order:
+		setup_custom_turn_order(spawned_enemies)
+	else:
+		setup_priority_based_turn_order(spawned_enemies)
+
+func setup_custom_turn_order(spawned_enemies: Array):
+	"""Use the explicitly defined turn order"""
+	turn_order.clear()
+	
+	for turn_index in current_encounter.custom_turn_order:
+		if turn_index >= 0 and turn_index < spawned_enemies.size():
+			turn_order.append(spawned_enemies[turn_index])
+		else:
+			push_warning("Invalid turn order index: " + str(turn_index))
+
+func setup_priority_based_turn_order(spawned_enemies: Array):
+	"""Use turn_priority values to determine order"""
+	turn_order.clear()
+	
+	# Create array of enemies with their spawn configs for priority sorting
+	var enemies_with_priority = []
+	
+	for i in range(spawned_enemies.size()):
+		if i < current_encounter.enemy_spawns.size():
+			var spawn_config = current_encounter.enemy_spawns[i]
+			enemies_with_priority.append({
+				"enemy": spawned_enemies[i],
+				"priority": spawn_config.turn_priority
+			})
+		else:
+			# Fallback for enemies without spawn config
+			enemies_with_priority.append({
+				"enemy": spawned_enemies[i],
+				"priority": 0
+			})
+	
+	# Sort by priority (lower priority goes first)
+	enemies_with_priority.sort_custom(func(a, b): return a.priority < b.priority)
+	
+	# Extract sorted enemies
+	for entry in enemies_with_priority:
+		turn_order.append(entry.enemy)
+
+func get_next_enemy_in_turn_order() -> Enemy:
+	"""Get the next enemy that should take a turn"""
+	if turn_order.is_empty():
+		return null
+	
+	# Find next alive enemy in turn order
+	var attempts = 0
+	while attempts < turn_order.size():
+		var enemy = turn_order[current_turn_index]
+		current_turn_index = (current_turn_index + 1) % turn_order.size()
+		
+		if enemy.is_alive():
+			return enemy
+		
+		attempts += 1
+	
+	# No alive enemies found
+	return null
+
+# --- Updated Enemy Turn Handling ---
+
+func execute_enemy_turns():
+	"""Execute enemy turns according to turn order"""
+	if turn_order.is_empty():
+		# Fallback to old behavior
+		for enemy in enemies:
+			if enemy.is_alive():
+				await enemy.start_turn()
+		return
+	
+	# Use turn order system
+	var enemies_that_acted = 0
+	var max_turns = turn_order.size()  # Prevent infinite loops
+	
+	while enemies_that_acted < max_turns:
+		var current_enemy = get_next_enemy_in_turn_order()
+		
+		if not current_enemy:
+			break  # No more alive enemies
+		
+		await current_enemy.start_turn()
+		enemies_that_acted += 1
+
+# --- Utility Functions ---
+
+func clear_enemies():
+	"""Clear all enemies from the battle"""
+	for enemy in enemies_container.get_children():
+		enemy.queue_free()
+
+func connect_enemy_signals():
+	"""Connect signals for all enemies"""
+	for enemy in enemies_container.get_children():
+		enemy.targeted.connect(_on_enemy_targeted)
+		enemy.died.connect(_on_enemy_died)
+
+func load_encounter(encounter_resource: EncounterData):
+	"""Load a new encounter (useful for transitioning between battles)"""
+	setup_encounter(encounter_resource)
