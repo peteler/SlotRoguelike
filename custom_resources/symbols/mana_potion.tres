@@ -7,7 +7,10 @@
 script = ExtResource("1_ifa71")
 texture = ExtResource("2_732ob")
 symbol_name = "Symbol"
-mana_gain = 2
-attack_gain = 0
-block_gain = 0
+target_type = null
+is_instant_effect = null
+health_effect = null
+mana_effect = 2
+attack_effect = null
+block_effect = null
 metadata/_custom_type_script = "uid://dwxqiops6h6f5"

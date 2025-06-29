@@ -20,7 +20,7 @@ signal roll_completed(symbols: Array[SymbolData])
 @onready var roll_button: Button = $RollButton
 
 # The number of slots the player currently has.
-var number_of_slots: int = 3 # You will update this from player stats.
+var number_of_slots: int = 5 # You will update this from player stats.
 
 var _symbol_pool = SymbolPool.new()
 

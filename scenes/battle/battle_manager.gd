@@ -19,7 +19,7 @@ enum TargetingMode { NONE, ATTACK, SPELL }
 var current_state: State
 var current_targeting_mode := TargetingMode.NONE
 var current_spell: Spell
-var player: PlayerCharacter # We'll assign this in _ready()
+var player_character: PlayerCharacter # We'll assign this in _ready()
 var enemies_container: Node # The parent node holding all enemy scenes
 var enemies: Array # enemies_container.get_children()
 
@@ -30,11 +30,13 @@ var enemies: Array # enemies_container.get_children()
 @onready var end_turn_button = $/root/Battle/UI/EndTurnButton
 # @onready var spell_panel = get_node("/root/Battle/UI/SpellPanel") # For later
 
+# general flags
+var player_attacked_flag = false
 
 func _ready():
 	# Get references to the characters
-	player = get_node("/root/Battle/Characters/Player")
-	enemies_container = get_node("/root/Battle/Characters/Enemies")
+	player_character = get_tree().get_first_node_in_group("player_character")
+	enemies_container = get_tree().get_first_node_in_group("enemies_container")
 	enemies = enemies_container.get_children()
 
 	# Connect signals from UI elements to our manager's functions.
@@ -52,7 +54,7 @@ func _ready():
 # --- Signal Handlers ---
 
 # Revised enemy targeting handler
-func _on_enemy_targeted(enemy_node):
+func _on_enemy_targeted(enemy_node: Area2D):
 	# Only process in targeting states
 	if current_state != State.PLAYER_TARGETING:
 		return
@@ -60,59 +62,15 @@ func _on_enemy_targeted(enemy_node):
 	# Handle based on current targeting mode
 	match current_targeting_mode:
 		TargetingMode.ATTACK:
-			# Apply player's attack to enemy
-			var damage = max(0, player.attack - enemy_node.current_block)
-			enemy_node.take_damage(damage)
-			
-			# Visual feedback
-			$Effects.create_damage_effect(enemy_node.position, damage)
-			
+			handle_attack_targeting(enemy_node)
+			# Disable attack for this turn
+			player_attacked_flag = true
 		TargetingMode.SPELL:
-			# Get current spell and execute it
-			if current_spell:
-				current_spell.execute(enemy_node)
-				
-				# Deduct mana cost
-				player.mana -= current_spell.mana_cost
-				player.update_mana_display()
-			
-		_:
-			# No valid targeting mode
-			return
+			handle_spell_targeting(enemy_node)
 	
 	# Clean up targeting state
 	end_targeting()
 
-# End targeting mode
-func end_targeting():
-	# TODO:  Remove highlights
-	
-	
-	# Reset targeting
-	current_targeting_mode = TargetingMode.NONE
-	current_spell = null
-	
-	# Return to action state
-	enter_state(State.PLAYER_ACTION)
-
-# Start attack targeting
-func start_attack_targeting():
-	current_targeting_mode = TargetingMode.ATTACK
-	enter_state(State.PLAYER_TARGETING)
-	
-	# TODO: Highlight enemies
-	
-
-# Start spell targeting
-func start_spell_targeting(spell: Spell):
-	current_targeting_mode = TargetingMode.SPELL
-	current_spell = spell
-	enter_state(State.PLAYER_TARGETING)
-	
-	# TODO: Highlight valid targets
-
-
-	
 func _on_slot_roll_completed(symbols: Array):
 	# This is called when the SlotMachine is done rolling.
 	# Make sure we are in the correct state to accept a roll.
@@ -130,7 +88,6 @@ func _on_slot_roll_completed(symbols: Array):
 	for symbol in symbols:
 		if !symbol.is_instant_effect:
 			await _process_symbol_with_delay(symbol, 0.3)
-	
 	enter_state(State.PLAYER_ACTION)
 
 # Attack button handler
@@ -140,8 +97,7 @@ func _on_attack_button_pressed():
 
 # Spell button handler (connect all spell buttons to this)
 func _on_spell_button_pressed(spell: Spell):
-	if current_state == State.PLAYER_ACTION and player.mana >= spell.mana_cost:
-		start_spell_targeting(spell)
+	pass
 
 func _on_end_turn_button_pressed():
 	if current_state != State.PLAYER_ACTION:
@@ -149,6 +105,9 @@ func _on_end_turn_button_pressed():
 	
 	# The player ends their turn, so we move to the enemy's turn.
 	enter_state(State.ENEMY_TURN)
+
+
+# --- state management functions ---
 
 func enter_state(new_state: State):
 	
@@ -164,14 +123,15 @@ func enter_state(new_state: State):
 			# spell_panel.hide() # for later
 
 			# Reset turn stats from the previous turn
+			init_player_start_of_turn()
+			init_enemy_start_of_turn()
 			
-			# TODO: Update UI to show these stats are 0
 
 		State.PLAYER_ACTION:
 			# The player has rolled, now they can act.
 			# Disable roll, enable actions.
 			roll_button.disabled = true
-			attack_button.disabled = false
+			attack_button.disabled = (player_character.attack <= 0) or player_attacked_flag
 			end_turn_button.disabled = false
 			# spell_panel.show() # for later
 
@@ -190,6 +150,57 @@ func enter_state(new_state: State):
 			await get_tree().create_timer(1.0).timeout # Simulate enemy thinking
 			print("Enemy turn ends.")
 			enter_state(State.PLAYER_ROLL)
+
+# End targeting mode
+func end_targeting():
+	# TODO:  Remove highlights
+	
+	# Reset targeting
+	current_targeting_mode = TargetingMode.NONE
+	current_spell = null
+	
+	# Return to action state
+	enter_state(State.PLAYER_ACTION)
+
+# Start attack targeting
+func start_attack_targeting():
+	current_targeting_mode = TargetingMode.ATTACK
+	enter_state(State.PLAYER_TARGETING)
+	
+	# TODO: Highlight enemies
+
+# Start spell targeting
+func start_spell_targeting(spell: Spell):
+	current_targeting_mode = TargetingMode.SPELL
+	current_spell = spell
+	enter_state(State.PLAYER_TARGETING)
+	
+	# TODO: Highlight valid targets
+
+func init_player_start_of_turn():
+	player_attacked_flag = false
+	player_character.attack = 0
+	player_character.block = 0
+
+# TODO: setup enemy intent system
+func init_enemy_start_of_turn():
+	pass
+
+# --- combat helper functions ---
+
+func handle_attack_targeting(target):
+	# Apply damage
+	var damage = max(0, player_character.attack - target.block)
+	target.take_damage_consider_block(damage)
+	
+	# TODO: Visual feedback
+
+func handle_spell_targeting(target):
+	if current_spell:
+		current_spell.execute(target)
+		# Deduct mana cost would go here
+
+# --- symbol interaction functions ---
 
 # Process a symbol with visual delay
 func _process_symbol_with_delay(symbol: SymbolData, delay: float):
@@ -215,7 +226,7 @@ func _process_symbol_immediately(symbol: SymbolData):
 func _get_targets_for_symbol(symbol: SymbolData) -> Array:
 	match symbol.target_type:
 		SymbolData.TARGET_TYPE.SELF:
-			return [player]
+			return [player_character]
 
 		SymbolData.TARGET_TYPE.SINGLE_ENEMY:
 			# Get first alive enemy (or use player-selected target)
@@ -234,7 +245,7 @@ func _get_targets_for_symbol(symbol: SymbolData) -> Array:
 			return []
 
 		SymbolData.TARGET_TYPE.ALL_CHARACTERS:
-			var all_chars = [player]
+			var all_chars = [player_character]
 			all_chars.append_array(enemies)
 			return all_chars.filter(func(c): return c.is_alive())
 

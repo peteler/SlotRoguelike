@@ -16,6 +16,7 @@ signal died
 signal turn_started
 signal turn_ended
 
+## variables
 var is_my_turn: bool = false
 
 @export var max_health: int = 100
@@ -36,7 +37,7 @@ var block: int = 0:
 var attack: int = 0:
 	set(value):
 		attack = value
-		emit_signal("block_updated", attack)
+		emit_signal("attack_updated", attack)
 
 func _ready():
 	# Connect the built-in Area2D signal to our targeting function
@@ -48,7 +49,7 @@ func _ready():
 
 # --- Core Combat Functions ---
 
-func take_damage(amount: int):
+func take_damage_consider_block(amount: int):
 	if amount <= 0: return
 
 	var damage_to_block = min(block, amount)
@@ -57,31 +58,21 @@ func take_damage(amount: int):
 	var remaining_damage = amount - damage_to_block
 	self.current_health -= remaining_damage
 
-func add_block(amount: int):
-	self.block += amount
-
 func heal(amount: int):
-	self.current_health += amount
-
-func modify_health(amount: int):
 	if amount > 0:
-		heal(amount)
-	else:
-		take_damage(-amount)
+		current_health += amount
 
 func modify_attack(amount: int):
-	self.attack += amount
-	emit_signal("attack_updated", self.attack)
-
+	attack += amount
 
 func modify_block(amount: int):
-	add_block(amount)
-	emit_signal("block_updated", self.block)
+	block += amount
 
 # --- Targeting Logic (moved from Enemy.gd) ---
 
 func _on_input_event(viewport, event, shape_idx):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed():
+		print("self: ", self)
 		# Let any listener (like the BattleManager) know this character was clicked.
 		emit_signal("targeted", self)
 
