@@ -8,10 +8,6 @@ var current_intent: EnemyAction
 var action_cooldowns: Dictionary = {}  # Track cooldowns for each action
 var turns_since_last_special: int = 0
 
-## Visuals and Placement
-@onready var sprite: Sprite2D = $Sprite2D
-@onready var collision_shape: CollisionShape2D = $CollisionShape2D
-@onready var stats_ui: Control = $StatsUI
 
 ## Intent display (UI element)
 @onready var intent_display: Control = $IntentDisplay
@@ -20,106 +16,26 @@ func _ready():
 	super._ready()  # Call Character._ready()
 	
 	if enemy_data:
-		# using a deferred call to ensure the sprite texture is loaded.
-		call_deferred("initialize_from_data")
+		initialize_character(enemy_data)
+		call_deferred("initialize_from_enemy_data")
+	else:
+		push_error("Enemy has no EnemyData assigned!")
 
-func initialize_from_data():
-	"""Initialize enemy stats from EnemyData resource"""
+func initialize_from_enemy_data():
+	"""Initialize enemy specific features from EnemyData resource"""
 	if not enemy_data:
 		push_error("Enemy has no EnemyData assigned!")
 		return
-	
-	# init stats
-	max_health = enemy_data.max_health
-	current_health = max_health
-	block = enemy_data.base_block
-	attack = enemy_data.base_attack
-	
-	# Set sprite if available
-	if sprite and enemy_data.sprite:
-		sprite.texture = enemy_data.sprite
-	
+		
 	# Initialize action cooldowns
 	for action in enemy_data.possible_actions:
 		action_cooldowns[action] = 0
-	
-	# Apply CollisionShape and Stats UI configuration
-	apply_ui_placement()
-	
-func apply_ui_placement():
-	"""
-	Applies UI placement configuration from EnemyData.
-	Called once from initialize_from_data().
-	"""
-	if not enemy_data or not sprite:
-		push_error("Missing EnemyData or Sprite2D for UI placement!")
-		return
-	
-	# Get the sprite's bounding box in its local coordinate system.
-	var sprite_rect = sprite.get_rect()
-	var sprite_size = sprite_rect.size
-	
-	print("Applying UI placement for ", enemy_data.character_name, " - Sprite size: ", sprite_size)
-	
-	# Apply CollisionShape configuration
-	if collision_shape:
-		if enemy_data.auto_fit_collision:
-			# Auto-fit the collision shape to the sprite's size and scale.
-			collision_shape.shape = enemy_data.create_auto_collision_shape(sprite_size)
-			collision_shape.scale = enemy_data.get_effective_collision_scale(sprite_size)
-		elif enemy_data.custom_collision_shape:
-			# Use a manually defined collision shape from the resource.
-			collision_shape.shape = enemy_data.custom_collision_shape
-			collision_shape.scale = enemy_data.collision_scale
-		
-		# Set the collision shape's position relative to the sprite.
-		collision_shape.position = sprite.position + enemy_data.collision_offset
 
-	# Apply Stats UI placement
-	if stats_ui:
-		# Get the correct offset based on sprite size.
-		var effective_offset = enemy_data.get_effective_stats_offset(sprite_size)
-		
-		# Get the anchor position relative to the sprite's local coordinates.
-		var anchor_pos = enemy_data.get_anchor_position(enemy_data.stats_ui_anchor, sprite_rect)
-		
-		# The stats UI is a child of the enemy node, so its position is relative to the enemy.
-		# This positioning is correct for a UI node placed as a sibling to the Sprite2D.
-		stats_ui.position = anchor_pos + effective_offset
-		stats_ui.scale = enemy_data.stats_ui_scale
-		
-		print("Stats UI positioned at: ", stats_ui.position, " (anchor: ", enemy_data.stats_ui_anchor, ")")
-	
-	# Setup individual UI components within StatsUI
-	setup_stats_ui_components()
-	
-func setup_stats_ui_components():
-	"""Position individual components within the StatsUI"""
-	if not stats_ui:
-		return
-	
-	# Find health bar component
-	var health_bar = stats_ui.get_node_or_null("HealthBar")
-	if health_bar:
-		health_bar.position = enemy_data.health_bar_local_offset
-	
-	# Find attack display component
-	var attack_display = stats_ui.get_node_or_null("AttackDisplay")
-	if attack_display:
-		attack_display.position = enemy_data.attack_display_local_offset
-	
-	# Find block display component
-	var block_display = stats_ui.get_node_or_null("BlockDisplay")
-	if block_display:
-		block_display.position = enemy_data.block_display_local_offset
-	
-	print("Configured UI components with local offsets")
-	
 # --- Turn Management (called by BattleManager) ---
 
 func start_turn():
 	"""Called by BattleManager when it's this enemy's turn"""
-	# is_my_turn = true
+	print("entered start_turn for, ", self)
 	
 	# Reduce cooldowns at start of turn
 	update_cooldowns()

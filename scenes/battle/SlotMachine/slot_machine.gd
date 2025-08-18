@@ -72,7 +72,7 @@ func _on_roll_button_pressed():
 			print("Warning: Symbol pool is empty!")
 		
 		# Wait for a short duration to create the left-to-right effect.
-		await get_tree().create_timer(0.2).timeout
+		await get_tree().create_timer(0.05).timeout
 
 	# 4. Emit the signal with the final, aggregated results.
 	Global.slot_roll_completed.emit(symbols_rolled)

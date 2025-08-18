@@ -10,6 +10,7 @@ var character: Character
 func _ready():
 	Global.character_block_updated.connect(_on_character_block_updated)
 	Global.character_attack_updated.connect(_on_character_attack_updated)
+	Global.character_health_updated.connect(_on_character_health_updated)
 	
 	character = get_parent() as Character
 	if character:
@@ -28,7 +29,7 @@ func _on_character_attack_updated(updated_character: Character, attack: int):
 		attack_label.text = str(attack)
 		attack_label.visible = attack > 0
 		
-func _on_character_health_changed(updated_character: Character, health: int, max_health: int):
+func _on_character_health_updated(updated_character: Character, health: int, max_health: int):
 	print("Signal received for health update. Character: ", updated_character.name, ", health: ", health)
 	if updated_character == character:
 		health_label.text = str(health)

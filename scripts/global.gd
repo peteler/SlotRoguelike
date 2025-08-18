@@ -8,7 +8,7 @@ signal all_enemy_turns_completed
 # Character Events
 signal character_targeted(character: Character)
 signal character_died(character: Character)
-signal character_health_changed(character: Character, current_health: int, max_health: int)
+signal character_health_updated(character: Character, current_health: int, max_health: int)
 signal character_block_updated(character: Character, block_amount: int)
 signal character_attack_updated(character: Character, attack_amount: int)
 

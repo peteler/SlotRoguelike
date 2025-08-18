@@ -125,7 +125,7 @@ func _on_slot_roll_completed(symbols: Array):
 	# Process remaining symbols in order
 	for symbol in symbols:
 		if !symbol.is_instant_effect:
-			await _process_symbol_with_delay(symbol, 0.3)
+			await _process_symbol_with_delay(symbol, 0.1)
 	enter_state(State.PLAYER_ACTION)
 
 # Attack button handler
@@ -355,6 +355,7 @@ func spawn_enemies_from_encounter():
 		var enemy_instance = create_enemy_from_spawn(enemy_spawn)
 		if enemy_instance:
 			enemies_container.add_child(enemy_instance)
+			print("added ", enemy_instance, " as child")
 
 func create_enemy_from_spawn(enemy_spawn: EnemySpawn) -> Enemy:
 	"""Create an enemy instance from spawn configuration"""
@@ -452,7 +453,9 @@ func execute_enemy_turns():
 	"""
 
 	for enemy in turn_order:
+		print("inside execute_enemy_turns loop")
 		if enemy.is_alive():
+			print("inside execute_enemy_turns loop, enemy is alive")
 			await enemy.start_turn()
 	
 	Global.all_enemy_turns_completed.emit()

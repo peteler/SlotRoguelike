@@ -13,6 +13,17 @@ offset_right = 261.0
 offset_bottom = 295.0
 script = ExtResource("1_6l4ln")
 
+[node name="HealthBar" type="TextureProgressBar" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+texture_under = SubResource("CanvasTexture_6l4ln")
+
+[node name="HealthLabel" type="Label" parent="HealthBar"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+
 [node name="AttackDisplay" type="HBoxContainer" parent="."]
 layout_mode = 0
 offset_right = 40.0
@@ -35,14 +46,3 @@ text = "2"
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
-
-[node name="HealthBar" type="TextureProgressBar" parent="."]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
-texture_under = SubResource("CanvasTexture_6l4ln")
-
-[node name="HealthLabel" type="Label" parent="HealthBar"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 23.0
