@@ -2,10 +2,6 @@
 class_name SlotMachine
 extends Control
 
-## Signal emitted when the roll is finished.
-## The dictionary will be in the format: { "mana": 5, "attack": 2, "defense": 0 }
-signal roll_completed(symbols: Array[SymbolData])
-
 # Assign your Slot.tscn scene in the Inspector.
 @export var slot_scene: PackedScene
 # Assign the player's starting symbols and their quantities here.
@@ -79,5 +75,5 @@ func _on_roll_button_pressed():
 		await get_tree().create_timer(0.2).timeout
 
 	# 4. Emit the signal with the final, aggregated results.
-	roll_completed.emit(symbols_rolled)
+	Global.slot_roll_completed.emit(symbols_rolled)
 	print("Roll complete! Symbols_rolled: ", symbols_rolled)

@@ -2,33 +2,24 @@
 class_name Character
 extends Area2D # We keep Area2D as the root for the built-in targeting.
 
-## A signal to notify other nodes (like the UI) that this character was targeted.
-signal targeted(character)
-
-## Signals for UI to listen to, ensuring the UI is decoupled from the logic.
-signal health_updated(current_health, max_health)
-signal block_updated(block_amount)
-signal attack_updated(attack_amount)
-signal died ## also for BattleManager to listen to
-
 @export var max_health: int = 100
 
 var current_health: int:
 	set(value):
 		current_health = clampi(value, 0, max_health)
-		emit_signal("health_updated", current_health, max_health)
+		Global.character_health_changed.emit(self, current_health, max_health)
 		if current_health == 0:
-			emit_signal("died")
+			Global.character_died.emit(self)
 
 var block: int = 0:
 	set(value):
 		block = value
-		emit_signal("block_updated", block)
+		Global.character_block_updated.emit(self, block)
 		
 var attack: int = 0:
 	set(value):
 		attack = value
-		emit_signal("attack_updated", attack)
+		Global.character_attack_updated.emit(self, attack)
 
 func _ready():
 	# Connect the built-in Area2D signal to our targeting function
@@ -40,7 +31,7 @@ func _ready():
 
 # --- Core Combat Functions ---
 
-func take_damage_consider_block(amount: int):
+func take_basic_attack_damage(amount: int):
 	if amount <= 0: return
 
 	var damage_to_block = min(block, amount)
@@ -65,4 +56,4 @@ func _on_input_event(_viewport, event, _shape_idx):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed():
 		print("self: ", self)
 		# Let any listener (like the BattleManager) know this character was clicked.
-		emit_signal("targeted", self)
+		Global.character_targeted.emit(self)

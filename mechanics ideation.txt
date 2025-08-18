@@ -1,0 +1,29 @@
+weapons:
+- instead of attack: roll
+- instead of attack: gain mana
+- instead of attack: defend
+- instead of attack: poison for double damage
+- attacks hit all enemies
+- lifesteal - (no defense?)
+- minions attack instead?
+- attack with your block stat instead of att stat
+
+
+system that will allow this:
+make attack button just activate weapon.basic_attack of a weapon resource/ ABSTRACT class, which every class inheriting from will have to implement.
+
+equipment vs relics: (probably both why not ...)
+equipment pros:
+-can switch builds more effectively
+
+
+
+character builds:
+block + attack scaling: [survive turns through high defense, all the while scaling your attack]
+	symbols:
+	- +1 attack permanently 
+	- high block symbols
+	
+	weapons:
+	- instead of attacking double it for next turn [cant double twice]
+	

@@ -64,10 +64,17 @@ func _ready():
 	player_status = PlayerStatus.new() 
 
 	# Connect signals from UI elements to our manager's functions 
-	# TODO: replace this with a function that loads ui
-	slot_machine.roll_completed.connect(_on_slot_roll_completed)
-	attack_button.pressed.connect(_on_attack_button_pressed)
-	end_turn_button.pressed.connect(_on_end_turn_button_pressed)
+	Global.slot_roll_completed.connect(_on_slot_roll_completed)
+	Global.attack_button_pressed.connect(_on_attack_button_pressed)
+	Global.end_turn_button_pressed.connect(_on_end_turn_button_pressed)
+	Global.spell_button_pressed.connect(_on_spell_button_pressed)
+	Global.character_targeted.connect(_on_character_targeted)
+	Global.character_died.connect(_on_character_died)
+	Global.enemy_turn_completed.connect(_on_enemy_turn_completed)
+	
+	# Connect UI elements to emit global signals instead of direct connections
+	attack_button.pressed.connect(func(): Global.attack_button_pressed.emit())
+	end_turn_button.pressed.connect(func(): Global.end_turn_button_pressed.emit())
 	
 	# Start the battle
 	enter_state(State.PLAYER_ROLL)
@@ -75,10 +82,16 @@ func _ready():
 # --- Signal Handlers ---
 
 # Revised enemy targeting handler
-func _on_enemy_targeted(enemy_node: Area2D):
+func _on_character_targeted(character: Character):
 	# Only process in targeting states
 	if current_state != State.PLAYER_TARGETING:
 		return
+	
+	# Only handle enemy targeting for now
+	if not character is Enemy:
+		return
+		
+	var enemy_node = character as Enemy
 	
 	# Handle based on current targeting mode
 	match current_targeting_mode:
@@ -92,9 +105,11 @@ func _on_enemy_targeted(enemy_node: Area2D):
 	# Clean up targeting state
 	end_targeting()
 
-#TODO:
-func _on_enemy_died(enemy_node: Area2D):
-	pass
+func _on_character_died(character: Character):
+	if character is Enemy:
+		var enemy = character as Enemy
+		# Handle enemy death logic here
+		pass
 
 func _on_slot_roll_completed(symbols: Array):
 	# This is called when the SlotMachine is done rolling.
@@ -130,6 +145,22 @@ func _on_end_turn_button_pressed():
 	
 	# The player ends their turn, so we move to the enemy's turn.
 	enter_state(State.ENEMY_TURN)
+
+func _on_enemy_turn_completed(enemy: Enemy):
+	# This replaces the direct enemy turn handling
+	current_turn_index += 1
+	
+	# Check if we need to continue enemy turns or end the enemy phase
+	if current_turn_index < turn_order.size():
+		var next_enemy = get_next_enemy_in_turn_order()
+		if next_enemy:
+			await next_enemy.start_turn()
+		else:
+			# No more enemies, end enemy phase
+			Global.all_enemy_turns_completed.emit()
+	else:
+		# All enemies have acted
+		Global.all_enemy_turns_completed.emit()
 # --------------------------------------------------
 
 # --- state management functions ---
@@ -137,6 +168,9 @@ func enter_state(new_state: State):
 	
 	current_state = new_state
 	print("Entering state: ", State.keys()[new_state]) # For debugging
+	
+	# Emit state change to global bus
+	Global.battle_state_changed.emit(State.keys()[new_state])
 
 	match new_state:
 		State.PLAYER_ROLL:
@@ -216,10 +250,8 @@ func init_enemy_start_of_turn():
 
 func handle_attack_targeting(target):
 	# Apply damage
-	var damage = max(0, player_character.attack - target.block)
-	target.take_damage_consider_block(damage)
-	
-	# TODO: Visual feedback
+	var damage = max(0, player_character.attack)
+	target.take_basic_attack_damage(damage)
 
 func handle_spell_targeting(target):
 	if current_spell:
@@ -231,7 +263,7 @@ func handle_spell_targeting(target):
 
 # Process a symbol with visual delay
 func _process_symbol_with_delay(symbol: SymbolData, delay: float):
-	emit_signal("symbol_processing_started", symbol)
+	Global.symbol_processing_started.emit(symbol)
 
 	# Get targets based on symbol type
 	var targets = _get_targets_for_symbol(symbol)
@@ -241,9 +273,9 @@ func _process_symbol_with_delay(symbol: SymbolData, delay: float):
 		_apply_symbol_to_target(symbol, target)
 		await get_tree().create_timer(delay / targets.size()).timeout
 
-	emit_signal("symbol_processing_completed", symbol)
+	Global.symbol_processing_completed.emit(symbol)
 
-# Process instant effects immediately
+# Process instant effects immediately, bypasses signaling, needed?
 func _process_symbol_immediately(symbol: SymbolData):
 	var targets = _get_targets_for_symbol(symbol)
 	for target in targets:
@@ -309,7 +341,7 @@ func _apply_symbol_to_target(symbol: SymbolData, target: Node):
 		if effect_instance.has_method("apply_effect"):
 			effect_instance.apply_effect(symbol, target)
 
-	emit_signal("symbol_effect_applied", symbol, target)
+	Global.symbol_effect_applied.emit(symbol, target)
 # --------------------------------------------------
 
 # --- Encounter Management ---
@@ -329,9 +361,6 @@ func setup_encounter(encounter_data: EncounterData):
 	
 	# Update enemies array
 	enemies = enemies_container.get_children()
-	
-	# Connect signals
-	connect_enemy_signals()
 
 func spawn_enemies_from_encounter():
 	"""Spawn all enemies defined in the encounter"""
@@ -503,12 +532,6 @@ func clear_enemies():
 	"""Clear all enemies from the battle"""
 	for enemy in enemies_container.get_children():
 		enemy.queue_free()
-
-func connect_enemy_signals():
-	"""Connect signals for all enemies"""
-	for enemy in enemies_container.get_children():
-		enemy.targeted.connect(_on_enemy_targeted)
-		enemy.died.connect(_on_enemy_died)
 
 func load_encounter(encounter_resource: EncounterData):
 	"""Load a new encounter (useful for transitioning between battles)"""

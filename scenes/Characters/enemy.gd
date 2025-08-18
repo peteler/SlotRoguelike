@@ -11,10 +11,6 @@ var turns_since_last_special: int = 0
 ## Intent display (UI element)
 @onready var intent_display: Control = $IntentDisplay
 
-## Enemy-specific signals (for UI/effects, not turn control)
-signal intent_selected(enemy: Enemy, action: EnemyAction)
-signal action_executed(enemy: Enemy, action: EnemyAction)
-
 func _ready():
 	super._ready()  # Call Character._ready()
 	
@@ -62,6 +58,8 @@ func finish_turn():
 	
 	# Apply end-of-turn effects (DOT, buffs, etc.)
 	apply_end_of_turn_effects()
+	
+	Global.enemy_turn_completed.emit(self)
 
 func select_intent():
 	"""Choose what action to take this turn"""
@@ -92,7 +90,7 @@ func select_intent():
 	
 	# Show intent to player
 	display_intent()
-	emit_signal("intent_selected", self, current_intent)
+	Global.enemy_intent_selected.emit(self, current_intent)
 
 func get_available_actions() -> Array[EnemyAction]:
 	"""Get actions that can be used this turn"""
@@ -196,13 +194,13 @@ func execute_current_intent():
 	if current_intent.cooldown_turns > 0:
 		action_cooldowns[current_intent] = current_intent.cooldown_turns
 	
-	emit_signal("action_executed", self, current_intent)
+	Global.enemy_action_executed.emit(self, current_intent)
 
 func execute_attack_action():
 	"""Deal damage to player"""
 	var player = get_tree().get_first_node_in_group("player_character")
 	if player and current_intent.damage_amount > 0:
-		player.take_damage_consider_block(current_intent.damage_amount)
+		player.take_basic_attack_damage(current_intent.damage_amount)
 		# Add animation delay
 		await get_tree().create_timer(0.3).timeout
 
