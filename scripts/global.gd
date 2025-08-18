@@ -3,7 +3,6 @@ extends Node
 
 # Battle Flow Events
 signal battle_state_changed(new_state: String)
-signal enemy_turn_completed(enemy: Enemy)
 signal all_enemy_turns_completed
 
 # Character Events

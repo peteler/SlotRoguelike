@@ -34,7 +34,6 @@ var current_spell: Spell
 
 # Turn order management
 var turn_order: Array[Enemy] = []
-var current_turn_index: int = 0
 
 # Spawn points container
 @onready var spawn_points: Node = $/root/Battle/SpawnPoints
@@ -70,7 +69,6 @@ func _ready():
 	Global.spell_button_pressed.connect(_on_spell_button_pressed)
 	Global.character_targeted.connect(_on_character_targeted)
 	Global.character_died.connect(_on_character_died)
-	Global.enemy_turn_completed.connect(_on_enemy_turn_completed)
 	
 	# Connect UI elements to emit global signals instead of direct connections
 	attack_button.pressed.connect(func(): Global.attack_button_pressed.emit())
@@ -146,21 +144,6 @@ func _on_end_turn_button_pressed():
 	# The player ends their turn, so we move to the enemy's turn.
 	enter_state(State.ENEMY_TURN)
 
-func _on_enemy_turn_completed(enemy: Enemy):
-	# This replaces the direct enemy turn handling
-	current_turn_index += 1
-	
-	# Check if we need to continue enemy turns or end the enemy phase
-	if current_turn_index < turn_order.size():
-		var next_enemy = get_next_enemy_in_turn_order()
-		if next_enemy:
-			await next_enemy.start_turn()
-		else:
-			# No more enemies, end enemy phase
-			Global.all_enemy_turns_completed.emit()
-	else:
-		# All enemies have acted
-		Global.all_enemy_turns_completed.emit()
 # --------------------------------------------------
 
 # --- state management functions ---
@@ -247,7 +230,7 @@ func init_enemy_start_of_turn():
 # --------------------------------------------------
 
 # --- combat helper functions ---
-
+#TODO: REPLACE THese FUNCTIONs TO SOMETHING IN CHARACTER.GD!!
 func handle_attack_targeting(target):
 	# Apply damage
 	var damage = max(0, player_character.attack)
@@ -434,7 +417,7 @@ func apply_spawn_modifiers(enemy: Enemy, spawn_config: EnemySpawn):
 	if not spawn_config.give_extra_actions.is_empty():
 		enemy.enemy_data.possible_actions.append_array(spawn_config.give_extra_actions)
 
-# --- Turn Order System ---
+# --- Enemy Turn Order System ---
 
 func setup_turn_order():
 	"""Establish the turn order for this encounter"""
@@ -443,7 +426,7 @@ func setup_turn_order():
 	if current_encounter.use_custom_turn_order:
 		setup_custom_turn_order(spawned_enemies)
 	else:
-		setup_priority_based_turn_order(spawned_enemies)
+		setup_basic_turn_order(spawned_enemies)
 
 func setup_custom_turn_order(spawned_enemies: Array):
 	"""Use the explicitly defined turn order"""
@@ -455,76 +438,24 @@ func setup_custom_turn_order(spawned_enemies: Array):
 		else:
 			push_warning("Invalid turn order index: " + str(turn_index))
 
-func setup_priority_based_turn_order(spawned_enemies: Array):
+func setup_basic_turn_order(spawned_enemies: Array):
 	"""Use turn_priority values to determine order"""
 	turn_order.clear()
-	
-	# Create array of enemies with their spawn configs for priority sorting
-	var enemies_with_priority = []
-	
-	for i in range(spawned_enemies.size()):
-		if i < current_encounter.enemy_spawns.size():
-			var spawn_config = current_encounter.enemy_spawns[i]
-			enemies_with_priority.append({
-				"enemy": spawned_enemies[i],
-				"priority": spawn_config.turn_priority
-			})
-		else:
-			# Fallback for enemies without spawn config
-			enemies_with_priority.append({
-				"enemy": spawned_enemies[i],
-				"priority": 0
-			})
-	
-	# Sort by priority (lower priority goes first)
-	enemies_with_priority.sort_custom(func(a, b): return a.priority < b.priority)
-	
-	# Extract sorted enemies
-	for entry in enemies_with_priority:
-		turn_order.append(entry.enemy)
 
-func get_next_enemy_in_turn_order() -> Enemy:
-	"""Get the next enemy that should take a turn"""
-	if turn_order.is_empty():
-		return null
-	
-	# Find next alive enemy in turn order
-	var attempts = 0
-	while attempts < turn_order.size():
-		var enemy = turn_order[current_turn_index]
-		current_turn_index = (current_turn_index + 1) % turn_order.size()
-		
-		if enemy.is_alive():
-			return enemy
-		
-		attempts += 1
-	
-	# No alive enemies found
-	return null
-
-# --- Updated Enemy Turn Handling ---
+	for enemy in spawned_enemies:
+		turn_order.append(enemy)
 
 func execute_enemy_turns():
-	"""Execute enemy turns according to turn order"""
-	if turn_order.is_empty():
-		# Fallback to old behavior
-		for enemy in enemies:
-			if enemy.is_alive():
-				await enemy.start_turn()
-		return
+	"""
+	Called once when entering enemy turn state
+	Executes enemy turns according to turn order
+	"""
+
+	for enemy in turn_order:
+		if enemy.is_alive():
+			await enemy.start_turn()
 	
-	# Use turn order system
-	var enemies_that_acted = 0
-	var max_turns = turn_order.size()  # Prevent infinite loops
-	
-	while enemies_that_acted < max_turns:
-		var current_enemy = get_next_enemy_in_turn_order()
-		
-		if not current_enemy:
-			break  # No more alive enemies
-		
-		await current_enemy.start_turn()
-		enemies_that_acted += 1
+	Global.all_enemy_turns_completed.emit()
 
 # --- Utility Functions ---
 
