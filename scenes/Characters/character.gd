@@ -9,7 +9,7 @@ var current_health: int:
 		current_health = clampi(value, 0, max_health)
 		print("current health, max health for ", self, " is: ", current_health, max_health)
 		Global.character_health_updated.emit(self, current_health, max_health)
-		if current_health == 0:
+		if not is_alive():
 			Global.character_died.emit(self)
 
 var block: int = 0:
@@ -149,3 +149,8 @@ func _on_input_event(_viewport, event, _shape_idx):
 		print("self: ", self)
 		# Let any listener (like the BattleManager) know this character was clicked.
 		Global.character_targeted.emit(self)
+
+# --- Utility functions ---
+func is_alive() -> bool:
+	"""Check if character is still alive"""
+	return current_health > 0

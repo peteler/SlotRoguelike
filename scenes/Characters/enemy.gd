@@ -262,10 +262,6 @@ func apply_end_of_turn_effects():
 
 # --- Utility Functions ---
 
-func is_alive() -> bool:
-	"""Check if enemy is still alive"""
-	return current_health > 0
-
 func get_reward_symbols() -> Array[SymbolData]:
 	"""Get symbols to reward player on defeat"""
 	if not enemy_data or enemy_data.symbol_rewards.is_empty():

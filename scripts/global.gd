@@ -4,6 +4,8 @@ extends Node
 # Battle Flow Events
 signal battle_state_changed(new_state: String)
 signal all_enemy_turns_completed
+signal battle_win
+signal battle_lose
 
 # Character Events
 signal character_targeted(character: Character)

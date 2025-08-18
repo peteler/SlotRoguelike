@@ -66,7 +66,6 @@ func _ready():
 	Global.slot_roll_completed.connect(_on_slot_roll_completed)
 	Global.attack_button_pressed.connect(_on_attack_button_pressed)
 	Global.end_turn_button_pressed.connect(_on_end_turn_button_pressed)
-	Global.spell_button_pressed.connect(_on_spell_button_pressed)
 	Global.character_targeted.connect(_on_character_targeted)
 	Global.character_died.connect(_on_character_died)
 	
@@ -79,7 +78,6 @@ func _ready():
 
 # --- Signal Handlers ---
 
-# Revised enemy targeting handler
 func _on_character_targeted(character: Character):
 	# Only process in targeting states
 	if current_state != State.PLAYER_TARGETING:
@@ -104,10 +102,25 @@ func _on_character_targeted(character: Character):
 	end_targeting()
 
 func _on_character_died(character: Character):
+	## THIS IS THE CHANGE ##
+	# Handle character death and check for battle end conditions
 	if character is Enemy:
 		var enemy = character as Enemy
-		# Handle enemy death logic here
-		pass
+		print("Enemy died: ", enemy.enemy_data.character_name)
+		
+		# Remove dead enemy from turn order
+		if enemy in turn_order:
+			turn_order.erase(enemy)
+		
+		# Check if all enemies are dead (battle win)
+		if are_all_enemies_dead():
+			enter_state(State.BATTLE_WIN)
+			return
+	
+	elif character == player_character:
+		print("Player character died!")
+		enter_state(State.BATTLE_LOSE)
+		return
 
 func _on_slot_roll_completed(symbols: Array):
 	# This is called when the SlotMachine is done rolling.
@@ -132,10 +145,6 @@ func _on_slot_roll_completed(symbols: Array):
 func _on_attack_button_pressed():
 	if current_state == State.PLAYER_ACTION:
 		start_attack_targeting()
-
-# Spell button handler (connect all spell buttons to this)
-func _on_spell_button_pressed(spell: Spell):
-	pass
 
 func _on_end_turn_button_pressed():
 	if current_state != State.PLAYER_ACTION:
@@ -192,8 +201,20 @@ func enter_state(new_state: State):
 			
 			# Return to player turn
 			enter_state(State.PLAYER_ROLL)
+			
+		State.BATTLE_WIN:
+			# Disable all player controls
+			disable_battle_ui()
+			
+			# Handle victory
+			handle_battle_win()
+			
+		State.BATTLE_LOSE:
+			# Disable all player controls
+			disable_battle_ui()
+			# Handle defeat
+			handle_battle_lose()
 
-# End targeting mode
 func end_targeting():
 	# TODO:  Remove highlights
 	
@@ -204,14 +225,12 @@ func end_targeting():
 	# Return to action state
 	enter_state(State.PLAYER_ACTION)
 
-# Start attack targeting
 func start_attack_targeting():
 	current_targeting_mode = TargetingMode.ATTACK
 	enter_state(State.PLAYER_TARGETING)
 	
 	# TODO: Highlight enemies
 
-# Start spell targeting
 func start_spell_targeting(spell: Spell):
 	current_targeting_mode = TargetingMode.SPELL
 	current_spell = spell
@@ -230,6 +249,7 @@ func init_enemy_start_of_turn():
 # --------------------------------------------------
 
 # --- combat helper functions ---
+
 #TODO: REPLACE THese FUNCTIONs TO SOMETHING IN CHARACTER.GD!!
 func handle_attack_targeting(target):
 	# Apply damage
@@ -243,7 +263,8 @@ func handle_spell_targeting(target):
 # --------------------------------------------------
 
 # --- symbol interaction functions ---
-
+# TODO: complete refactor, symbol effects should be implemented by a new symbol resource
+# TODO: battle manager should only be responsible for symbol order
 # Process a symbol with visual delay
 func _process_symbol_with_delay(symbol: SymbolData, delay: float):
 	Global.symbol_processing_started.emit(symbol)
@@ -325,6 +346,11 @@ func _apply_symbol_to_target(symbol: SymbolData, target: Node):
 			effect_instance.apply_effect(symbol, target)
 
 	Global.symbol_effect_applied.emit(symbol, target)
+# --------------------------------------------------
+
+# --- Player spawn ---
+func place_player_in_encounter(player: PlayerCharacter):
+	pass
 # --------------------------------------------------
 
 # --- Encounter Management ---
@@ -417,6 +443,7 @@ func apply_spawn_modifiers(enemy: Enemy, spawn_config: EnemySpawn):
 	# Add extra actions
 	if not spawn_config.give_extra_actions.is_empty():
 		enemy.enemy_data.possible_actions.append_array(spawn_config.give_extra_actions)
+# --------------------------------------------------
 
 # --- Enemy Turn Order System ---
 
@@ -459,6 +486,34 @@ func execute_enemy_turns():
 			await enemy.start_turn()
 	
 	Global.all_enemy_turns_completed.emit()
+# --------------------------------------------------
+
+# --- Battle End Condition Functions ---
+
+func are_all_enemies_dead() -> bool:
+	"""Check if all enemies in the encounter are defeated"""
+	for enemy in enemies_container.get_children():
+		if enemy is Enemy and enemy.is_alive():
+			return false
+	return true
+
+func disable_battle_ui():
+	"""Disable all battle UI elements when battle ends"""
+	roll_button.disabled = true
+	attack_button.disabled = true
+	end_turn_button.disabled = true
+
+func handle_battle_win():
+	print("Battle win")
+	# Emit victory signal with rewards
+	Global.battle_win.emit()
+
+func handle_battle_lose():
+	print("Battle lose")
+	# Emit defeat signal
+	Global.battle_lose.emit()
+
+# --------------------------------------------------
 
 # --- Utility Functions ---
 
@@ -470,3 +525,4 @@ func clear_enemies():
 func load_encounter(encounter_resource: EncounterData):
 	"""Load a new encounter (useful for transitioning between battles)"""
 	setup_encounter(encounter_resource)
+# --------------------------------------------------
