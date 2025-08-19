@@ -2,7 +2,7 @@
 # Add this as an autoload singleton in Project Settings
 extends Node
 
-## Scene paths 
+## Scene paths [ NOT REAL ]
 const BATTLE_SCENE = "res://scenes/Battle.tscn"
 const MAP_SCENE = "res://scenes/Map.tscn"
 const MAIN_MENU_SCENE = "res://scenes/MainMenu.tscn"

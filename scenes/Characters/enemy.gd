@@ -16,18 +16,16 @@ func _ready():
 	super._ready()  # Call Character._ready()
 	
 	if enemy_data:
-		initialize_character(enemy_data)
-		call_deferred("initialize_from_enemy_data")
+		initialize_from_enemy_data(enemy_data)
 	else:
 		push_error("Enemy has no EnemyData assigned!")
 
-func initialize_from_enemy_data():
+func initialize_from_enemy_data(data: EnemyData):
 	"""Initialize enemy specific features from EnemyData resource"""
-	if not enemy_data:
-		push_error("Enemy has no EnemyData assigned!")
-		return
-		
-	# Initialize action cooldowns
+	# init base character data, stats, ui, etc.
+	initialize_character(data)
+	
+	# Initialize specific enemy data
 	for action in enemy_data.possible_actions:
 		action_cooldowns[action] = 0
 

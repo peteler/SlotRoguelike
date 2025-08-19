@@ -13,6 +13,7 @@ signal character_died(character: Character)
 signal character_health_updated(character: Character, current_health: int, max_health: int)
 signal character_block_updated(character: Character, block_amount: int)
 signal character_attack_updated(character: Character, attack_amount: int)
+signal player_mana_updated(current_mana: int) 
 
 # Enemy Specific Events
 signal enemy_intent_selected(enemy: Enemy, action: EnemyAction)
@@ -23,6 +24,11 @@ signal slot_roll_completed(symbols: Array[SymbolData])
 signal symbol_processing_started(symbol: SymbolData)
 signal symbol_processing_completed(symbol: SymbolData)
 signal symbol_effect_applied(symbol: SymbolData, target: Node)
+signal symbol_sequence_completed(symbols: Array[SymbolData])
+
+# Symbol Pool Events
+signal symbol_pool_updated  # When symbols are added/removed from pool
+
 
 # Player Action Events
 signal attack_button_pressed

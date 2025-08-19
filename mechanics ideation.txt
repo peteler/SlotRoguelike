@@ -21,9 +21,10 @@ equipment pros:
 character builds:
 block + attack scaling: [survive turns through high defense, all the while scaling your attack]
 	symbols:
-	- +1 attack permanently 
+	- +n base attack permanently [once per fight? how to fix annoying gameplay of looking for it? always shows up on first roll?]
 	- high block symbols
 	
 	weapons:
-	- instead of attacking double it for next turn [cant double twice]
+	- instead of attacking, double attack for next turn [cant double twice]
 	
+block + poison: [play the long game, survive via block while poison does damage every turn]

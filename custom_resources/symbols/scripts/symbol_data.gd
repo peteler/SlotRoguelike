@@ -11,18 +11,22 @@ enum TARGET_TYPE {
 	ALL_CHARACTERS, # Applies to everyone
 	NONE            # No target (global effects)
 }
-
-## The visual representation of the symbol
+enum RARITY {
+	COMMON,
+	UNCOMMON,
+	RARE,
+	EPIC,
+	LEGENDARY
+}
+enum EDITION {
+	# like foil, polychrome, etc.. some additional random modifier
+}
+@export var symbol_name: String = "Basic Symbol"
+@export var description: String = ""
 @export var texture: Texture2D
-
-## The name or ID of the symbol
-@export var symbol_name: String = "Symbol"
-
-## Who should receive this symbol effect?
 @export var target_type: TARGET_TYPE = TARGET_TYPE.SELF
-
-## Should this symbol be processed immediately when rolled?
-@export var is_instant_effect: bool = false
+@export var rarity: RARITY = RARITY.COMMON
+@export var edition: EDITION
 
 ## Stat modifications (can be positive or negative)
 @export var health_effect: int = 0
@@ -30,19 +34,17 @@ enum TARGET_TYPE {
 @export var attack_effect: int = 0
 @export var block_effect: int = 0
 
-## Special effect script (optional)
+# Special effect configuration
+@export var special_effect_id: String = ""  # References SymbolProcessor logic
+@export var effect_parameters: Dictionary = {}  # Configurable parameters
 @export var effect_script: GDScript
 
-## Visual effect to play when processed
-@export var visual_effect: PackedScene
+# Visual and audio
+@export var visual_effect_scene: PackedScene
+@export var sound_effect: AudioStream
+@export var animation_duration: float = 0.3
 
-# Helper function to get target type as string
-func get_target_string() -> String:
-	match target_type:
-		TARGET_TYPE.SELF: return "Self"
-		TARGET_TYPE.SINGLE_ENEMY: return "Single Enemy"
-		TARGET_TYPE.ALL_ENEMIES: return "All Enemies"
-		TARGET_TYPE.RANDOM_ENEMY: return "Random Enemy"
-		TARGET_TYPE.ALL_CHARACTERS: return "All Characters"
-		TARGET_TYPE.NONE: return "None"
-	return "Unknown"
+# Gameplay flags
+@export var is_instant: bool = false  # Applied immediately vs on target
+@export var is_consumable: bool = false  # Removed after use
+@export var triggers_on_draw: bool = false  # Special symbols that activate when drawn

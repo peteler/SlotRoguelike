@@ -14,3 +14,7 @@ git push (Sync local snapshots to GitHub)
 repo link:
 
 https://github.com/peteler/SlotRoguelike
+
+Trello work board:
+
+https://trello.com/b/lXAZ0kzN/rollingknight-roguelite-prototype

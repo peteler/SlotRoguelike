@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://k0eru0jyth8d"]
+[gd_scene load_steps=4 format=3 uid="uid://k0eru0jyth8d"]
 
 [ext_resource type="Script" uid="uid://3cr1aextj3bw" path="res://scenes/battle/SlotMachine/slot_machine.gd" id="1_kicpr"]
 [ext_resource type="PackedScene" uid="uid://cx8mcpq7h5l86" path="res://scenes/battle/SlotMachine/slot.tscn" id="2_j5cky"]
+[ext_resource type="Script" uid="uid://byfhb336ab8y3" path="res://scenes/battle/SlotMachine/symbol_processor.gd" id="3_0mugw"]
 
 [node name="SlotMachine" type="Control" groups=["SlotMachine"]]
 layout_mode = 3
@@ -27,4 +28,5 @@ size_flags_horizontal = 8
 text = "ROLL
 "
 
-[node name="Node2D" type="Node2D" parent="."]
+[node name="SymbolProcessor" type="Node" parent="."]
+script = ExtResource("3_0mugw")

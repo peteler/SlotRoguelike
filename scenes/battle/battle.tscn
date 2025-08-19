@@ -39,6 +39,7 @@ position = Vector2(1000, 425)
 [node name="PlayerCharacter" parent="Characters" groups=["player_character"] instance=ExtResource("3_h0kxc")]
 position = Vector2(279, 371)
 script = ExtResource("4_fh7rg")
+player_data = null
 
 [node name="UI" type="CanvasLayer" parent="."]
 layer = -1
