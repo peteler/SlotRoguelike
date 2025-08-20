@@ -22,11 +22,24 @@ var current_targeting_mode := TargetingMode.NONE
 var current_spell: Spell
 
 
-## UI Node References
-@onready var slot_machine = $/root/Battle/UI/SlotMachine
-@onready var roll_button = $/root/Battle/UI/SlotMachine/RollButton
-@onready var attack_button = $/root/Battle/UI/AttackButton
-@onready var end_turn_button = $/root/Battle/UI/EndTurnButton
+## UI Node References - now relative to self since BattleManager is root
+@onready var slot_machine_container = $UI/SlotMachineContainer
+@onready var attack_button = $UI/AttackButton
+@onready var end_turn_button = $UI/EndTurnButton
+
+## Scene references
+@onready var characters_node = $Characters
+@onready var enemies_container = $Characters/Enemies
+@onready var spawn_points = $SpawnPoints
+@onready var player_spawn = $PlayerSpawn
+
+## Runtime created objects
+var slot_machine: Node
+var player_character: PlayerCharacter
+
+## Scene resources
+@export var player_character_scene: PackedScene = preload("res://scenes/characters/player_character.tscn")
+@export var slot_machine_scene: PackedScene = preload("res://scenes/battle/SlotMachine/slot_machine.tscn")
 
 ## Encounter Management
 @export var current_encounter: EncounterData
@@ -34,47 +47,98 @@ var current_spell: Spell
 
 # Turn order management
 var turn_order: Array[Enemy] = []
-
-# Spawn points container
-@onready var spawn_points: Node = $/root/Battle/SpawnPoints
-
-## Characters
-var player_character: PlayerCharacter # We'll assign this in _ready()
-var enemies_container: Node # The parent node holding all enemy scenes
-var enemies: Array # enemies_container.get_children()
+var enemies: Array
 
 # classes [structs]
 class PlayerStatus:
 	var has_attacked: bool = false
 var player_status: PlayerStatus
+# --------------------------------------------------
 
 func _ready():
-	# Get references to the characters
-	player_character = get_tree().get_first_node_in_group("player_character")
-	enemies_container = get_tree().get_first_node_in_group("enemies_container")
-	
-	# Load encounter if set
-	if current_encounter:
-		setup_encounter(current_encounter)
-	else:
-		push_warning("No encounter data set for BattleManager")
-	
-	# init structs
-	player_status = PlayerStatus.new() 
+	# Add to group for GameController to find
+	print("battle_manager.ready called")
+	add_to_group("battle_manager")
+	print("add_to_group called")
+	# initialization is called from gamecontroller
 
-	# Connect signals from UI elements to our manager's functions 
+
+# called once by GameController to initialize a battle encounter
+func initialize_battle(encounter_data: EncounterData, player_data: PlayerData):
+	"""Called by GameController to set up the battle with proper data"""
+	if not encounter_data or not player_data:
+		push_error("Missing encounter or player data for battle initialization!")
+		return
+	
+	# Store references
+	current_encounter = encounter_data
+	
+	# Initialize runtime objects with the provided data
+	spawn_player_character(player_data)
+	create_slot_machine(player_data)
+	
+	# Set up the encounter
+	setup_encounter(encounter_data)
+	
+	# Initialize other systems
+	player_status = PlayerStatus.new()
+	
+	# Connect signals after everything is set up
+	setup_signals()
+	
+	# Start the battle
+	enter_state(State.PLAYER_ROLL)
+# --------------------------------------------------
+
+# --- init helpers ---
+func setup_signals():
+	"""Set up all signal connections"""
 	Global.slot_roll_completed.connect(_on_slot_roll_completed)
 	Global.attack_button_pressed.connect(_on_attack_button_pressed)
 	Global.end_turn_button_pressed.connect(_on_end_turn_button_pressed)
 	Global.character_targeted.connect(_on_character_targeted)
 	Global.character_died.connect(_on_character_died)
 	
-	# Connect UI elements to emit global signals instead of direct connections
+	# Connect UI elements to emit global signals
 	attack_button.pressed.connect(func(): Global.attack_button_pressed.emit())
 	end_turn_button.pressed.connect(func(): Global.end_turn_button_pressed.emit())
+
+func spawn_player_character(player_data: PlayerData):
+	"""Create player character from provided player_data"""
+	if not player_data:
+		push_error("No player data available for battle!")
+		return
 	
-	# Start the battle
-	enter_state(State.PLAYER_ROLL)
+	# Instantiate player character
+	player_character = player_character_scene.instantiate()
+	player_character.player_data = player_data
+	
+	# Position at spawn point
+	if player_spawn:
+		player_character.global_position = player_spawn.global_position
+	
+	# Add to scene
+	characters_node.add_child(player_character)
+	print("Player character spawned")
+
+func create_slot_machine(player_data: PlayerData):
+	"""Create slot machine based on provided player data"""
+	if not player_data:
+		push_error("No player data for slot machine!")
+		return
+	
+	# Instantiate slot machine
+	slot_machine = slot_machine_scene.instantiate()
+	slot_machine_container.add_child(slot_machine)
+	
+	# Initialize with player data
+	if slot_machine.has_method("init_from_player_data"):
+		slot_machine.init_from_player_data(player_data)
+	
+	# Add to group for any other systems that need to find it
+	slot_machine.add_to_group("slot_machine")
+	print("Slot machine created and initialized")
+# --------------------------------------------------
 
 # --- Signal Handlers ---
 
@@ -143,10 +207,8 @@ func _on_attack_button_pressed():
 func _on_end_turn_button_pressed():
 	if current_state != State.PLAYER_ACTION:
 		return
-	
 	# The player ends their turn, so we move to the enemy's turn.
 	enter_state(State.ENEMY_TURN)
-
 # --------------------------------------------------
 
 # --- state management functions ---
@@ -161,7 +223,8 @@ func enter_state(new_state: State):
 	match new_state:
 		State.PLAYER_ROLL:
 			# Enable the roll button, disable actions.
-			roll_button.disabled = false
+			if slot_machine:
+				slot_machine.enable_roll()
 			attack_button.disabled = true
 			end_turn_button.disabled = true
 			# spell_panel.hide() # for later
@@ -174,7 +237,8 @@ func enter_state(new_state: State):
 		State.PLAYER_ACTION:
 			# The player has rolled, now they can act.
 			# Disable roll, enable actions.
-			roll_button.disabled = true
+			if slot_machine:
+				slot_machine.disable_roll()
 			attack_button.disabled = (player_character.attack <= 0) or player_status.has_attacked
 			end_turn_button.disabled = false
 			# spell_panel.show() # for later
@@ -257,6 +321,7 @@ func handle_spell_targeting(target):
 # --------------------------------------------------
 
 # --- Player spawn & slot machine setup ---
+
 func setup_player_in_encounter(player: PlayerCharacter):
 	pass
 
@@ -410,7 +475,8 @@ func are_all_enemies_dead() -> bool:
 
 func disable_battle_ui():
 	"""Disable all battle UI elements when battle ends"""
-	roll_button.disabled = true
+	if slot_machine and slot_machine.has_method("disable_roll"):
+		slot_machine.disable_roll()
 	attack_button.disabled = true
 	end_turn_button.disabled = true
 

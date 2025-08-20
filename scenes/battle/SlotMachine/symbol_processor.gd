@@ -142,7 +142,7 @@ func apply_conditional_bonus(target: Character, params: Dictionary):
 				target.heal(params.get("bonus_heal", 3))
 
 # Utility functions
-func get_targets_for_symbol(symbol: SymbolData) -> Array[Character]:
+func get_targets_for_symbol(symbol: SymbolData) -> Array:
 	"""Determine targets for a symbol based on its target type"""
 	match symbol.target_type:
 		SymbolData.TARGET_TYPE.SELF:

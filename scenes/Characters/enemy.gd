@@ -9,10 +9,11 @@ var action_cooldowns: Dictionary = {}  # Track cooldowns for each action
 var turns_since_last_special: int = 0
 
 
-## Intent display (UI element)
-@onready var intent_display: Control = $IntentDisplay
+##TODO: Intent display (UI element)
+# @onready var intent_display: Control = $IntentDisplay
 
 func _ready():
+	print("entered player's ready")
 	super._ready()  # Call Character._ready()
 	
 	if enemy_data:
@@ -50,8 +51,7 @@ func finish_turn():
 	# is_my_turn = false
 	current_intent = null
 	
-	# Apply end-of-turn effects (DOT, buffs, etc.)
-	apply_end_of_turn_effects()
+	#TODO: Apply end-of-turn effects (DOT, buffs, etc.)
 
 func select_intent():
 	"""Choose what action to take this turn"""
@@ -80,8 +80,8 @@ func select_intent():
 		_:
 			current_intent = select_weighted_action(available_actions)
 	
-	# Show intent to player
-	display_intent()
+	#TODO: Show intent to player
+
 	Global.enemy_intent_selected.emit(self, current_intent)
 
 func get_available_actions() -> Array[EnemyAction]:
@@ -238,12 +238,6 @@ func create_basic_attack_action() -> EnemyAction:
 	action.damage_amount = enemy_data.base_attack if enemy_data else 5
 	return action
 
-func display_intent():
-	"""Show the player what this enemy plans to do"""
-	if intent_display and current_intent:
-		# TODO: Update intent display UI
-		# For now, just print to console
-		print(enemy_data.enemy_name + " intends to: " + current_intent.get_intent_description())
 
 func update_cooldowns():
 	"""Update action cooldowns at start of turn"""
@@ -253,10 +247,6 @@ func update_cooldowns():
 	
 	turns_since_last_special += 1
 
-func apply_end_of_turn_effects():
-	"""Handle end-of-turn effects like DOT, buffs, etc."""
-	# TODO: Implement status effect system
-	pass
 
 # --- Utility Functions ---
 

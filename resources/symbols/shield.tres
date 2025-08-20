@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SymbolData" load_steps=3 format=3 uid="uid://ca3wcqralj3nx"]
+
+[ext_resource type="Script" uid="uid://dwxqiops6h6f5" path="res://resources/symbols/scripts/symbol_data.gd" id="1_jhtxi"]
+[ext_resource type="Texture2D" uid="uid://7u3uclj0fwe2" path="res://assets/slot_machine_symbols/shield-svgrepo-com.svg" id="2_gexcj"]
+
+[resource]
+script = ExtResource("1_jhtxi")
+texture = ExtResource("2_gexcj")
+symbol_name = "Symbol"
+target_type = null
+is_instant_effect = null
+health_effect = null
+mana_effect = null
+attack_effect = null
+block_effect = 2
+metadata/_custom_type_script = "uid://dwxqiops6h6f5"

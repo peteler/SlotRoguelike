@@ -1,0 +1,79 @@
+[gd_scene load_steps=2 format=3 uid="uid://dfmamdho0d2x"]
+
+[ext_resource type="Script" uid="uid://toxqvsk2r35c" path="res://scenes/battle/battle_manager.gd" id="1_m23xw"]
+
+[node name="BattleManager" type="Node2D" groups=["battle_manager"]]
+script = ExtResource("1_m23xw")
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.3956, 0.415093, 0.43, 1)
+metadata/_edit_lock_ = true
+
+[node name="SpawnPoints" type="Node2D" parent="."]
+
+[node name="Left" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(680, 425)
+
+[node name="mid" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(845, 415)
+
+[node name="right" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(1000, 425)
+
+[node name="Characters" type="Node2D" parent="."]
+
+[node name="Enemies" type="Node2D" parent="Characters"]
+
+[node name="UI" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="SlotMachineContainer" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="SpellsPanel" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="ManaLabel" type="Label" parent="UI/SpellsPanel"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="Spells" type="HBoxContainer" parent="UI/SpellsPanel"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Equipment" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="AttackButton" type="Button" parent="UI"]
+offset_left = 374.0
+offset_top = 378.0
+offset_right = 432.0
+offset_bottom = 409.0
+text = "Attack"
+
+[node name="EndTurnButton" type="Button" parent="UI"]
+offset_left = 976.0
+offset_top = 490.0
+offset_right = 1054.0
+offset_bottom = 521.0
+text = "End Turn
+"
+
+[node name="PlayerSpawn" type="Marker2D" parent="."]
+position = Vector2(243, 418)

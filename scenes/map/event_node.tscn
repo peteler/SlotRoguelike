@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://tokicvkn1u4l"]
+
+[ext_resource type="Script" uid="uid://b0bdrcvli1726" path="res://scenes/map/event_node.gd" id="1_0vhrs"]
+
+[node name="EventNode" type="Button"]
+offset_right = 8.0
+offset_bottom = 8.0
+script = ExtResource("1_0vhrs")

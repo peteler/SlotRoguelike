@@ -28,7 +28,9 @@ var attack: int = 0:
 
 func _ready():
 	# Connect the built-in Area2D signal to our targeting function
+	# already connected to player_characteR?
 	self.input_event.connect(_on_input_event)
+	
 
 # --- Stats & UI initialization from character_data ---
 

@@ -11,21 +11,14 @@ config_version=5
 [application]
 
 config/name="Slots Spells Strikes"
-run/main_scene="uid://dfmamdho0d2x"
+run/main_scene="uid://duuurx7jx5iv5"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
 
-Global="*res://scripts/global.gd"
-GameController="*res://scripts/game_controller.gd"
-
-[global_group]
-
-player_character=""
-enemies_container=""
-battle_manager=""
-slot_machine=""
+Global="*res://autoload/global.gd"
+GameController="*res://autoload/game_controller.gd"
 
 [rendering]
 

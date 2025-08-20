@@ -19,8 +19,12 @@ func _ready():
 	add_child(symbol_processor)
 	
 	roll_button.pressed.connect(_on_roll_button_pressed)
-	
 
+func enable_roll():
+	roll_button.disabled = false
+
+func disable_roll():
+	roll_button.disabled = true
 # called once from game_controller when setting up battle_manager
 func init_from_player_data(player_data: PlayerData):
 	

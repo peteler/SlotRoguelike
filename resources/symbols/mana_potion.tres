@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="SymbolData" load_steps=3 format=3 uid="uid://xmnlr1co0kha"]
+
+[ext_resource type="Script" uid="uid://dwxqiops6h6f5" path="res://resources/symbols/scripts/symbol_data.gd" id="1_ifa71"]
+[ext_resource type="Texture2D" uid="uid://b5rnfclgo61tm" path="res://assets/slot_machine_symbols/potion-half-svgrepo-com.svg" id="2_732ob"]
+
+[resource]
+script = ExtResource("1_ifa71")
+texture = ExtResource("2_732ob")
+symbol_name = "Symbol"
+target_type = null
+is_instant_effect = null
+health_effect = null
+mana_effect = 2
+attack_effect = null
+block_effect = null
+metadata/_custom_type_script = "uid://dwxqiops6h6f5"

@@ -1,3 +1,30 @@
-[gd_scene format=3 uid="uid://duuurx7jx5iv5"]
+[gd_scene load_steps=2 format=3 uid="uid://duuurx7jx5iv5"]
 
-[node name="MainMenu" type="Node2D"]
+[ext_resource type="Script" uid="uid://cd80o37fhwdkr" path="res://scripts/main_menu.gd" id="1_l6cm7"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_l6cm7")
+
+[node name="StartButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 80.0
+offset_top = 420.0
+offset_right = 280.0
+offset_bottom = 470.0
+text = "Start Game
+"
+
+[node name="QuitButton" type="Button" parent="."]
+layout_mode = 0
+offset_left = 80.0
+offset_top = 500.0
+offset_right = 280.0
+offset_bottom = 550.0
+text = "Quit
+"

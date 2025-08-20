@@ -1,0 +1,24 @@
+[gd_scene load_steps=2 format=3 uid="uid://bqpfjksor3vrk"]
+
+[ext_resource type="Script" uid="uid://dlxbh3fja1o7q" path="res://scenes/battle/victory_screen.gd" id="1_dst2q"]
+
+[node name="VictoryScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_dst2q")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+text = "VICTORY"
+
+[node name="MapButton" type="Button" parent="."]
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+text = "Return to Map"

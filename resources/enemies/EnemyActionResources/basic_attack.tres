@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="EnemyAction" load_steps=3 format=3 uid="uid://c0h8f2vxfv2t4"]
+
+[ext_resource type="Texture2D" uid="uid://b3cgae1xahvhy" path="res://icon.svg" id="1_4rk35"]
+[ext_resource type="Script" uid="uid://dunxuqfq6wbsu" path="res://resources/enemies/enemy_action.gd" id="1_71lad"]
+
+[resource]
+script = ExtResource("1_71lad")
+action_name = "Slash"
+action_type = 0
+icon = ExtResource("1_4rk35")
+damage_amount = 8
+block_amount = 0
+heal_amount = 0
+effect_duration = 1
+min_health_percent = 0.0
+max_health_percent = 1.0
+cooldown_turns = 0
+metadata/_custom_type_script = "uid://dunxuqfq6wbsu"

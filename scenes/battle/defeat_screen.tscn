@@ -1,0 +1,23 @@
+[gd_scene load_steps=2 format=3 uid="uid://tcef4fqqnutr"]
+
+[ext_resource type="Script" uid="uid://vp6jvwpdt4q3" path="res://scenes/battle/defeat_screen.gd" id="1_u8r1t"]
+
+[node name="DefeatScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_u8r1t")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+text = "DEFEAT"
+
+[node name="MainMenuButton" type="Button" parent="."]
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0

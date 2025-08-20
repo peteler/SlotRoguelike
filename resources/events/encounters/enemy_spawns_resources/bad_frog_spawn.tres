@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="EnemySpawn" load_steps=4 format=3 uid="uid://chs7vh4s0va8g"]
+
+[ext_resource type="Script" uid="uid://dunxuqfq6wbsu" path="res://resources/enemies/enemy_action.gd" id="1_h501r"]
+[ext_resource type="Resource" uid="uid://oa74dl07qe80" path="res://resources/enemies/EnemyDataResources/bad_frog.tres" id="1_qs6n3"]
+[ext_resource type="Script" uid="uid://coofxtucre0ka" path="res://resources/events/encounters/enemy_spawn.gd" id="2_qs6n3"]
+
+[resource]
+script = ExtResource("2_qs6n3")
+enemy_data = ExtResource("1_qs6n3")
+spawn_point_name = "mid"
+spawn_offset = Vector2(0, 0)
+health_multiplier = 1.0
+attack_multiplier = 1.0
+give_extra_actions = Array[ExtResource("1_h501r")]([])
+turn_priority = 0
+metadata/_custom_type_script = "uid://coofxtucre0ka"
