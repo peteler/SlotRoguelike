@@ -257,6 +257,9 @@ func handle_spell_targeting(target):
 # --------------------------------------------------
 
 # --- Player spawn & slot machine setup ---
+func setup_player_in_encounter(player: PlayerCharacter):
+	pass
+
 func place_player_in_encounter(player: PlayerCharacter):
 	pass
 # --------------------------------------------------

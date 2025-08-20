@@ -3,22 +3,26 @@
 extends Node
 
 ## Scene paths [ NOT REAL ]
-const BATTLE_SCENE = "res://scenes/Battle.tscn"
-const MAP_SCENE = "res://scenes/Map.tscn"
-const MAIN_MENU_SCENE = "res://scenes/MainMenu.tscn"
-const VICTORY_SCREEN_SCENE = "res://scenes/VictoryScreen.tscn"
-const DEFEAT_SCREEN_SCENE = "res://scenes/DefeatScreen.tscn"
+const BATTLE_SCENE = "res://scenes/battle/battle.tscn"
+const MAP_SCENE = "res://scenes/map.tscn"
+const MAIN_MENU_SCENE = "res://scenes/main_menu.tscn"
+const VICTORY_SCREEN_SCENE = "res://scenes/victory_screen.tscn"
+const DEFEAT_SCREEN_SCENE = "res://scenes/defeat_screen.tscn"
 
-## Player progression data
-# var player_symbol_pool: Dictionary = {}/ custom resource?
-var player_data: PlayerData  #TODO
+## Player reference: DATA PERSISTS! SCENES GET DESTROYED, that's why playerdata and not playercharacter
+var player_data: PlayerData
 
 ## Current game state
 var current_event: EventData
 
+# ------------------------------------------
+
 func _ready():
 	# Set up singleton to persist between scenes
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	
+	# Get references
+	player_data = get_player_data_reference()
 	
 	# Connect to global signals for game flow
 	Global.battle_win.connect(_on_battle_win)
@@ -37,14 +41,17 @@ func change_scene_to(scene_path: String):
 
 func start_new_game():
 	
-	# Initialize player data
+	# TODO: Initialize player data? needed or done by ready() function of player_character? does he need to be a child or what?
 	
 	# Go to map or first encounter
 	change_scene_to(MAP_SCENE)
 
+
+# --- Battle Management ---
+
 func start_battle(encounter_data: EncounterData):
 	"""Start a battle with the given encounter data"""
-	current_encounter = encounter_data
+	current_event = encounter_data as EncounterData
 	change_scene_to(BATTLE_SCENE)
 	
 	# After scene loads, set up the battle manager
@@ -56,12 +63,17 @@ func setup_battle_manager():
 	var battle_manager = get_tree().get_first_node_in_group("battle_manager")
 	var slot_machine = get_tree().get_first_node_in_group("slot_machine")
 	
-	if battle_manager and current_encounter:
-		battle_manager.current_encounter = current_encounter
-		battle_manager.setup_encounter(current_encounter)
-	
-	if slot_machine:
-		slot_machine.player_symbol_pool = player_symbol_pool.duplicate()
+	if battle_manager and current_event.event_type == EventData.EVENT_TYPE.ENCOUNTER:
+		battle_manager.setup_encounter(current_event)
+	else:
+		push_error("setup_battle_manager failed")
+		
+	if slot_machine and player_data:
+		slot_machine.init_from_player_data(player_data)
+	else:
+		push_error("slot_machine init failed")
+
+
 
 # --- Signal Handlers ---
 
@@ -69,15 +81,9 @@ func _on_battle_win():
 	"""Handle battle victory"""
 	print("Game Controller: Battle Victory!")
 	
-	# Store rewards for display
-	last_battle_rewards = rewards
-	encounters_completed += 1
-	
-	# Add rewards to player's symbol pool
-	add_rewards_to_player_pool(rewards)
-	
-	# The BattleManager will handle showing victory screen briefly
-	# Then emit return_to_map signal
+	# TODO:
+	# switch to a rewards scene? 
+	# then wait for a signal to return to map, that signal will
 
 func _on_battle_lose():
 	"""Handle battle defeat"""
@@ -90,6 +96,9 @@ func _on_return_to_map():
 	"""Return to map after victory"""
 	print("Game Controller: Returning to map")
 	change_scene_to(MAP_SCENE)
+	
+	# TODO: how to know where to return to? i need the map manager to remember all map related data
+	
 
 func _on_game_over():
 	"""Handle game over"""
@@ -97,6 +106,7 @@ func _on_game_over():
 	change_scene_to(MAIN_MENU_SCENE)
 
 func _on_event_selected(event_data: EventData):
+	# TODO:
 	# switch case for event types? shop/ battle encounter/ custom event?
 	pass
 
@@ -111,3 +121,12 @@ func load_game():
 	"""Load saved game state (implement as needed)"""
 	# TODO: Implement save system
 	pass
+
+func get_player_data_reference() -> PlayerData:
+	"""Get reference to player data - adapt this to your game's architecture"""
+	var player = get_tree().get_first_node_in_group("player_character") as PlayerCharacter
+	if player and player.player_data:
+		return player.player_data
+	else: 
+		push_error("failed: get_player_data_reference")
+		return null

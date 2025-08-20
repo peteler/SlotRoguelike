@@ -1,4 +1,4 @@
-# PlayerData.gd - Dynamic player save data
+# PlayerData.gd - Dynamic player save data that persists between different scene roots
 @tool
 class_name PlayerData
 extends CharacterData

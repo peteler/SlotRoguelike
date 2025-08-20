@@ -29,11 +29,15 @@ signal symbol_sequence_completed(symbols: Array[SymbolData])
 # Symbol Pool Events
 signal symbol_pool_updated  # When symbols are added/removed from pool
 
-
 # Player Action Events
 signal attack_button_pressed
 signal end_turn_button_pressed
 signal spell_button_pressed(spell: Spell)
+
+# Game Controller events
+signal return_to_map
+signal game_over
+signal event_selected
 
 func _ready():
 	# Set up the singleton to persist between scenes
