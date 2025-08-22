@@ -30,14 +30,13 @@ func _ready():
 	# Connect the built-in Area2D signal to our targeting function
 	# already connected to player_characteR?
 	self.input_event.connect(_on_input_event)
-	
 
 # --- Stats & UI initialization from character_data ---
-
-func initialize_character(character_data: CharacterData):
-	"""Initialize character stats from CharacterData resource"""
+## INPUT: character_data OR player_data
+## [difference is character_data is a static resource and player_data is a dynamic resource]
+func initialize_character_stats(character_data):
 	if not character_data:
-		push_error("character has no CharacterData assigned!")
+		push_error("character has no CharacterData/PlayerData assigned!")
 		return
 	
 	# init stats
@@ -46,13 +45,15 @@ func initialize_character(character_data: CharacterData):
 	block = character_data.base_block
 	attack = character_data.base_attack
 	print("finished setting up stats for: ", character_data.character_name)
-	
+
+func initialize_character_ui(character_data: CharacterData):
 	# Set sprite if available
 	if sprite and character_data.sprite:
 		sprite.texture = character_data.sprite
 	
 	# Apply CollisionShape and Stats UI configuration
 	apply_ui_placement(character_data)
+	print("called apply_ui_placement, attack display local offset: ", character_data.attack_display_local_offset)
 
 func apply_ui_placement(character_data: CharacterData):
 	"""
@@ -114,6 +115,7 @@ func setup_stats_ui_components(character_data: CharacterData):
 	# Find attack display component
 	var attack_display = stats_ui.get_node_or_null("AttackDisplay")
 	if attack_display:
+		print("attack_display present")
 		attack_display.position = character_data.attack_display_local_offset
 	
 	# Find block display component

@@ -1,4 +1,5 @@
 # EnemyData.gd - A resource for defining enemy-specific data
+@tool
 class_name EnemyData
 extends CharacterData
 

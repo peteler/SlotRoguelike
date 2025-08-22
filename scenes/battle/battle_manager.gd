@@ -49,10 +49,6 @@ var player_character: PlayerCharacter
 var turn_order: Array[Enemy] = []
 var enemies: Array
 
-# classes [structs]
-class PlayerStatus:
-	var has_attacked: bool = false
-var player_status: PlayerStatus
 # --------------------------------------------------
 
 func _ready():
@@ -80,8 +76,6 @@ func initialize_battle(encounter_data: EncounterData, player_data: PlayerData):
 	# Set up the encounter
 	setup_encounter(encounter_data)
 	
-	# Initialize other systems
-	player_status = PlayerStatus.new()
 	
 	# Connect signals after everything is set up
 	setup_signals()
@@ -156,11 +150,12 @@ func _on_character_targeted(character: Character):
 	# Handle based on current targeting mode
 	match current_targeting_mode:
 		TargetingMode.ATTACK:
-			handle_attack_targeting(enemy_node)
-			# Disable attack for this turn
-			player_status.has_attacked = true
+			var damage = player_character.calc_and_return_basic_attack_damage()
+			enemy_node.take_basic_attack_damage(damage)
+			# Disable attack for this turn [ TODO: switch to function for modularity]
+			player_character.can_attack = false
 		TargetingMode.SPELL:
-			handle_spell_targeting(enemy_node)
+			pass
 	
 	# Clean up targeting state
 	end_targeting()
@@ -239,7 +234,7 @@ func enter_state(new_state: State):
 			# Disable roll, enable actions.
 			if slot_machine:
 				slot_machine.disable_roll()
-			attack_button.disabled = (player_character.attack <= 0) or player_status.has_attacked
+			attack_button.disabled = (player_character.attack <= 0) or (not player_character.can_attack)
 			end_turn_button.disabled = false
 			# spell_panel.show() # for later
 
@@ -289,6 +284,7 @@ func start_attack_targeting():
 	
 	# TODO: Highlight enemies
 
+#TODO: spell system
 func start_spell_targeting(spell: Spell):
 	current_targeting_mode = TargetingMode.SPELL
 	current_spell = spell
@@ -297,27 +293,13 @@ func start_spell_targeting(spell: Spell):
 	# TODO: Highlight valid targets
 
 func init_player_start_of_turn():
-	player_status.has_attacked = false
+	player_character.can_attack = true
 	player_character.attack = 0
 	player_character.block = 0
 
 # TODO: setup enemy intent system
 func init_enemy_start_of_turn():
 	pass
-# --------------------------------------------------
-
-# --- combat helper functions ---
-
-#TODO: REPLACE THese FUNCTIONs TO SOMETHING IN CHARACTER.GD!!
-func handle_attack_targeting(target):
-	# Apply damage
-	var damage = max(0, player_character.attack)
-	target.take_basic_attack_damage(damage)
-
-func handle_spell_targeting(target):
-	if current_spell:
-		current_spell.execute(target)
-		# Deduct mana cost would go here
 # --------------------------------------------------
 
 # --- Player spawn & slot machine setup ---
@@ -378,8 +360,8 @@ func create_enemy_from_spawn(enemy_spawn: EnemySpawn) -> Enemy:
 	var spawn_position = get_spawn_position(enemy_spawn)
 	enemy_instance.global_position = spawn_position
 	
-	# Apply modifiers
-	apply_spawn_modifiers(enemy_instance, enemy_spawn)
+	#TODO: check if needed... Apply modifiers
+	# apply_spawn_modifiers(enemy_instance, enemy_spawn)
 	
 	return enemy_instance
 
@@ -405,20 +387,20 @@ func get_default_spawn_position() -> Vector2:
 	"""Fallback position when no spawn point is specified"""
 	return Vector2(600, 300)  # Adjust to your game's layout
 
-func apply_spawn_modifiers(enemy: Enemy, spawn_config: EnemySpawn):
-	"""Apply spawn-specific modifiers to an enemy"""
-	# Apply health modifier
-	if spawn_config.health_multiplier != 1.0:
-		enemy.max_health = int(enemy.max_health * spawn_config.health_multiplier)
-		enemy.current_health = enemy.max_health
-	
-	# Apply attack modifier (modify the enemy data's base attack)
-	if spawn_config.attack_multiplier != 1.0 and enemy.enemy_data:
-		enemy.enemy_data.base_attack = int(enemy.enemy_data.base_attack * spawn_config.attack_multiplier)
-	
-	# Add extra actions
-	if not spawn_config.give_extra_actions.is_empty():
-		enemy.enemy_data.possible_actions.append_array(spawn_config.give_extra_actions)
+#func apply_spawn_modifiers(enemy: Enemy, spawn_config: EnemySpawn):
+	#"""Apply spawn-specific modifiers to an enemy"""
+	## Apply health modifier
+	#if spawn_config.health_multiplier != 1.0:
+		#enemy.max_health = int(enemy.max_health * spawn_config.health_multiplier)
+		#enemy.current_health = enemy.max_health
+	#
+	## Apply attack modifier (modify the enemy data's base attack)
+	#if spawn_config.attack_multiplier != 1.0 and enemy.enemy_data:
+		#enemy.enemy_data.base_attack = int(enemy.enemy_data.base_attack * spawn_config.attack_multiplier)
+	#
+	## Add extra actions
+	#if not spawn_config.give_extra_actions.is_empty():
+		#enemy.enemy_data.possible_actions.append_array(spawn_config.give_extra_actions)
 # --------------------------------------------------
 
 # --- Enemy Turn Order System ---
@@ -489,7 +471,6 @@ func handle_battle_lose():
 	print("Battle lose")
 	# Emit defeat signal
 	Global.battle_lose.emit()
-
 # --------------------------------------------------
 
 # --- Utility Functions ---
@@ -499,7 +480,4 @@ func clear_enemies():
 	for enemy in enemies_container.get_children():
 		enemy.queue_free()
 
-func load_encounter(encounter_resource: EncounterData):
-	"""Load a new encounter (useful for transitioning between battles)"""
-	setup_encounter(encounter_resource)
 # --------------------------------------------------

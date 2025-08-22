@@ -1,12 +1,17 @@
 # PlayerData.gd - Dynamic player save data that persists between different scene roots
 @tool
 class_name PlayerData
-extends CharacterData
+extends Resource
 
 ## Core Identity
 @export var class_data: PlayerClassData  # Reference to the class this character is
-@export var player_level: int = 1
-@export var experience: int = 0
+var character_name = class_data.character_name if class_data else null
+
+## Core Stats (these change during a run)
+@export var max_health: int = 30
+@export var current_health: int = 30
+@export var base_attack: int = 5
+@export var base_block: int = 0
 
 ## Current Resources (these change during gameplay)
 @export_group("Current Resources")
@@ -15,10 +20,8 @@ extends CharacterData
 @export var current_mana: int = 3
 @export var max_mana: int = 10
 @export var mana_per_turn: int = 1 # mana restored per turn
-@export var gold: int = 100
+@export var gold: int = 0
 
-## Health Management (extends CharacterData)
-@export var current_health: int = 30
 
 ## Collections (grow during gameplay)
 @export_group("Collections")
@@ -32,22 +35,6 @@ extends CharacterData
 @export_group("Progress")
 @export var current_path: Array[String] = []  # Track which encounters were chosen
 @export var special_events_visited: Array[String] = [] # no duplicate events during runs
-
-# Initialize with starting symbols
-# TODO: symbol pool should be loaded from player_class_data
-func init_player_symbols_for_testing():
-	if not symbol_pool:
-		symbol_pool = SymbolPool.new()
-		# Add starting symbols
-		var sword_symbol = preload("res://resources/symbols/sword.tres")
-		var shield_symbol = preload("res://resources/symbols/shield.tres")
-		var heart_symbol = preload("res://resources/symbols/heart.tres")
-		var mana_symbol = preload("res://resources/symbols/mana_potion.tres")
-		
-		symbol_pool.add_symbol(sword_symbol, 5)
-		symbol_pool.add_symbol(shield_symbol, 5)
-		symbol_pool.add_symbol(heart_symbol, 1)
-		symbol_pool.add_symbol(mana_symbol, 2)
 
 ##TODO: MAYBE THESE ARE GOOD WHEN SYMBOL EFFECTS ARE ACTUALLY ADDED, SOLVE SYMBOL SYSTEM FIRST !
 # Helper functions for resource management
@@ -75,6 +62,7 @@ func remove_symbol_from_pool(symbol: SymbolData, amount: int = 1) -> bool:
 func get_symbol_pool() -> SymbolPool:
 	"""Get the player's symbol pool"""
 	return symbol_pool
+
 func can_afford(cost: int) -> bool:
 	"""Check if player can afford something"""
 	return gold >= cost

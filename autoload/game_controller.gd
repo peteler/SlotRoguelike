@@ -9,6 +9,9 @@ const MAIN_MENU_SCENE = "res://scenes/main_menu.tscn"
 const VICTORY_SCREEN_SCENE = "res://scenes/battle/victory_screen.tscn"
 const DEFEAT_SCREEN_SCENE = "res://scenes/battle/defeat_screen.tscn"
 
+## Class paths
+var test_class: PlayerClassData = load("res://resources/player/player_classes/test_player_class.tres")
+
 ## Player reference: DATA PERSISTS! SCENES GET DESTROYED, that's why playerdata and not playercharacter
 var player_data: PlayerData
 
@@ -38,9 +41,10 @@ func change_scene_to(scene_path: String):
 
 func start_new_game():
 	"""Initialize new game and go to map"""
-	# Create fresh player data
-	player_data = PlayerData.new()
-	player_data.init_player_symbols_for_testing()
+	# Create fresh player data from class
+	if test_class:
+		player_data = test_class.create_starting_player_data()
+
 	
 	# Go to map
 	change_scene_to(MAP_SCENE)

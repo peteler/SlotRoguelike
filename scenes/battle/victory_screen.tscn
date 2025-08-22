@@ -13,12 +13,16 @@ script = ExtResource("1_dst2q")
 
 [node name="Label" type="Label" parent="."]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 23.0
+offset_left = 80.0
+offset_top = 400.0
+offset_right = 147.0
+offset_bottom = 423.0
 text = "VICTORY"
 
 [node name="MapButton" type="Button" parent="."]
 layout_mode = 0
-offset_right = 8.0
-offset_bottom = 8.0
+offset_left = 80.0
+offset_top = 450.0
+offset_right = 200.0
+offset_bottom = 481.0
 text = "Return to Map"

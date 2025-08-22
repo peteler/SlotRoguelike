@@ -1,4 +1,4 @@
-# CharacterData.gd - Resource for character configuration
+# CharacterData.gd - Resource that all spawnable entities should inherit from
 @tool
 class_name CharacterData
 extends Resource

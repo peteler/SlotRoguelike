@@ -24,7 +24,8 @@ func _ready():
 func initialize_from_enemy_data(data: EnemyData):
 	"""Initialize enemy specific features from EnemyData resource"""
 	# init base character data, stats, ui, etc.
-	initialize_character(data)
+	initialize_character_stats(data)
+	initialize_character_ui(data)
 	
 	# Initialize specific enemy data
 	for action in enemy_data.possible_actions:
@@ -193,8 +194,6 @@ func execute_attack_action():
 	var player = get_tree().get_first_node_in_group("player_character")
 	if player and current_intent.damage_amount > 0:
 		player.take_basic_attack_damage(current_intent.damage_amount)
-		# Add animation delay
-		await get_tree().create_timer(0.3).timeout
 
 func execute_defend_action():
 	"""Gain block"""

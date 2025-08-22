@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="SymbolPool" load_steps=6 format=3 uid="uid://dkhuarj60r2hp"]
+
+[ext_resource type="Script" uid="uid://bu7q30yiokipy" path="res://scenes/battle/SlotMachine/symbol_pool.gd" id="1_t3agp"]
+[ext_resource type="Resource" uid="uid://bouyqgd5u7ow6" path="res://resources/symbols/heart.tres" id="1_trpc3"]
+[ext_resource type="Resource" uid="uid://xmnlr1co0kha" path="res://resources/symbols/mana_potion.tres" id="2_i5c1y"]
+[ext_resource type="Resource" uid="uid://ca3wcqralj3nx" path="res://resources/symbols/shield.tres" id="3_v42ba"]
+[ext_resource type="Resource" uid="uid://cqpdnrh8ansa6" path="res://resources/symbols/sword.tres" id="4_e5a1o"]
+
+[resource]
+script = ExtResource("1_t3agp")
+available_symbols = {
+ExtResource("1_trpc3"): 1,
+ExtResource("2_i5c1y"): 2,
+ExtResource("3_v42ba"): 5,
+ExtResource("4_e5a1o"): 5
+}
+metadata/_custom_type_script = "uid://bu7q30yiokipy"

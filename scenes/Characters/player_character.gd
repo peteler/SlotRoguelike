@@ -11,6 +11,9 @@ var mana: int = 0:
 ## Player character data resource
 @export var player_data: PlayerData
 
+## battle manager helper fields [should eventually be changed into a function if mechanic will be updated]
+var can_attack: bool = false
+
 func _ready():
 	super._ready()  # Call Character._ready()
 	
@@ -25,10 +28,18 @@ func _ready():
 
 func initialize_from_player_data(data: PlayerData):
 	"""Initialize player character from PlayerData resource"""
-	player_data = data
+	if not data:
+		push_error("PlayerCharacter requires valid PlayerData to initialize!")
+		return
+	
+	self.player_data = data
 	
 	# Initialize base character stats
-	initialize_character(data)
+	initialize_character_stats(data)
+	print("called initialize_character_stats on: ", self)
+	
+	initialize_character_ui(player_data.class_data)
+	print("called initialize_character_ui on: ", self)
 	
 	# Set player-specific stats
 	mana = data.current_mana
@@ -57,6 +68,9 @@ func cast_spell(spell_cost: int) -> bool:
 		mana -= spell_cost
 		return true
 	return false
+
+func calc_and_return_basic_attack_damage() -> int:
+	return attack
 
 ## Override take_basic_attack_damage to add player-specific effects
 func take_basic_attack_damage(amount: int):

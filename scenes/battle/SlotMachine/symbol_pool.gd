@@ -1,4 +1,5 @@
 # SymbolPool.gd - Dynamic symbol pool resource
+@tool
 class_name SymbolPool
 extends Resource
 
