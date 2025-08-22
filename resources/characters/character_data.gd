@@ -3,12 +3,10 @@
 class_name CharacterData
 extends Resource
 
-## Basic enemy information
+## Basic character information
 @export var character_name: String = "character"
 @export var sprite: Texture2D
 @export var max_health: int = 30
-@export var base_attack: int = 5
-@export var base_block: int = 0
 
 ## UI Placement Configuration
 @export_group("UI Placement")

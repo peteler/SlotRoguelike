@@ -3,10 +3,15 @@ class_name PlayerCharacter
 extends Character
 
 ## Player-specific stats
-var mana: int = 0:
+var current_mana: int = 0:
 	set(value):
-		mana = max(0, value)
-		Global.player_mana_updated.emit(mana)
+		current_mana = max(0, value)
+		Global.player_mana_updated.emit(current_mana)
+
+var turn_attack: int = 0:
+	set(value):
+		turn_attack = value
+		Global.character_attack_updated.emit(self, turn_attack)
 
 ## Player character data resource
 @export var player_data: PlayerData
@@ -14,6 +19,7 @@ var mana: int = 0:
 ## battle manager helper fields [should eventually be changed into a function if mechanic will be updated]
 var can_attack: bool = false
 
+## functions
 func _ready():
 	super._ready()  # Call Character._ready()
 	
@@ -42,35 +48,13 @@ func initialize_from_player_data(data: PlayerData):
 	print("called initialize_character_ui on: ", self)
 	
 	# Set player-specific stats
-	mana = data.current_mana
+	current_mana = data.current_mana
 	
 	# Apply any temporary modifiers
-	max_health = data.get_total_health()
+	max_health = data.max_health
 	current_health = data.current_health
-	attack = data.get_total_attack()
-	block = data.get_total_block()
 	
 	print("Player character initialized: ", data.character_name)
-
-## Player-specific functions
-
-func modify_mana(amount: int):
-	"""Modify mana by amount"""
-	mana += amount
-
-func can_cast_spell(spell_cost: int) -> bool:
-	"""Check if player has enough mana for a spell"""
-	return mana >= spell_cost
-
-func cast_spell(spell_cost: int) -> bool:
-	"""Attempt to cast a spell, returns true if successful"""
-	if can_cast_spell(spell_cost):
-		mana -= spell_cost
-		return true
-	return false
-
-func calc_and_return_basic_attack_damage() -> int:
-	return attack
 
 ## Override take_basic_attack_damage to add player-specific effects
 func take_basic_attack_damage(amount: int):
@@ -79,6 +63,12 @@ func take_basic_attack_damage(amount: int):
 	# Add screen shake, damage effects, etc. here
 	add_damage_effect()
 
+func init_start_of_turn():
+	can_attack = true
+	turn_attack = 0
+	current_block = 0
+
+## Art functions
 func add_damage_effect():
 	"""Add visual/audio effects when player takes damage"""
 	# TODO: Add screen shake, damage popup, sound effect

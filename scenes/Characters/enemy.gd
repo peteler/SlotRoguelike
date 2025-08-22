@@ -8,6 +8,9 @@ var current_intent: EnemyAction
 var action_cooldowns: Dictionary = {}  # Track cooldowns for each action
 var turns_since_last_special: int = 0
 
+## These change during combat, EnemyActions use these implicitly
+var attack_val: int
+var block_val: int
 
 ##TODO: Intent display (UI element)
 # @onready var intent_display: Control = $IntentDisplay
@@ -24,12 +27,16 @@ func _ready():
 func initialize_from_enemy_data(data: EnemyData):
 	"""Initialize enemy specific features from EnemyData resource"""
 	# init base character data, stats, ui, etc.
-	initialize_character_stats(data)
+	initialize_character_stats(data) # only sets up health,max health for now
 	initialize_character_ui(data)
 	
-	# Initialize specific enemy data
+	## Initialize specific enemy data
 	for action in enemy_data.possible_actions:
 		action_cooldowns[action] = 0
+	# for now init attack, block like this since it's an enemy specific system
+	attack_val = data.base_attack
+	block_val = data.base_block
+
 
 # --- Turn Management (called by BattleManager) ---
 
@@ -41,7 +48,7 @@ func start_turn():
 	update_cooldowns()
 	
 	# AI decision making and execution
-	select_intent()
+	select_intent() ## shouldnt be here, should be selected when entering player_roll! here just execute
 	await execute_current_intent()
 	
 	# Clean up turn state
@@ -50,7 +57,7 @@ func start_turn():
 func finish_turn():
 	"""Clean up after turn is complete"""
 	# is_my_turn = false
-	current_intent = null
+	current_intent = null ## make sure display is gone too
 	
 	#TODO: Apply end-of-turn effects (DOT, buffs, etc.)
 
@@ -189,15 +196,15 @@ func execute_current_intent():
 	
 	Global.enemy_action_executed.emit(self, current_intent)
 
-func execute_attack_action():
+func execute_basic_attack_action():
 	"""Deal damage to player"""
 	var player = get_tree().get_first_node_in_group("player_character")
-	if player and current_intent.damage_amount > 0:
-		player.take_basic_attack_damage(current_intent.damage_amount)
+	if player and attack_val > 0:
+		player.take_basic_attack_damage(attack_val)
 
-func execute_defend_action():
+func execute_basic_defend_action():
 	"""Gain block"""
-	if current_intent.block_amount > 0:
+	if block_val > 0:
 		modify_block(current_intent.block_amount)
 		await get_tree().create_timer(0.2).timeout
 
@@ -229,15 +236,6 @@ func execute_debuff_action():
 
 # --- Helper Functions ---
 
-func create_basic_attack_action() -> EnemyAction:
-	"""Fallback basic attack when no actions are available"""
-	var action = EnemyAction.new()
-	action.action_name = "Basic Attack"
-	action.action_type = EnemyAction.ActionType.ATTACK
-	action.damage_amount = enemy_data.base_attack if enemy_data else 5
-	return action
-
-
 func update_cooldowns():
 	"""Update action cooldowns at start of turn"""
 	for action in action_cooldowns:
@@ -245,21 +243,3 @@ func update_cooldowns():
 			action_cooldowns[action] -= 1
 	
 	turns_since_last_special += 1
-
-
-# --- Utility Functions ---
-
-func get_reward_symbols() -> Array[SymbolData]:
-	"""Get symbols to reward player on defeat"""
-	if not enemy_data or enemy_data.symbol_rewards.is_empty():
-		return []
-	
-	var rewards: Array[SymbolData] = []
-	var available_rewards = enemy_data.symbol_rewards.duplicate()
-	
-	for i in range(min(enemy_data.reward_count, available_rewards.size())):
-		var reward_index = randi() % available_rewards.size()
-		rewards.append(available_rewards[reward_index])
-		available_rewards.remove_at(reward_index)
-	
-	return rewards

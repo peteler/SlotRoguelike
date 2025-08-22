@@ -12,15 +12,10 @@ var current_health: int:
 		if not is_alive():
 			Global.character_died.emit(self)
 
-var block: int = 0:
+var current_block: int = 0:
 	set(value):
-		block = value
-		Global.character_block_updated.emit(self, block)
-
-var attack: int = 0:
-	set(value):
-		attack = value
-		Global.character_attack_updated.emit(self, attack)
+		current_block = value
+		Global.character_block_updated.emit(self, current_block)
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
@@ -32,6 +27,7 @@ func _ready():
 	self.input_event.connect(_on_input_event)
 
 # --- Stats & UI initialization from character_data ---
+
 ## INPUT: character_data OR player_data
 ## [difference is character_data is a static resource and player_data is a dynamic resource]
 func initialize_character_stats(character_data):
@@ -42,8 +38,7 @@ func initialize_character_stats(character_data):
 	# init stats
 	max_health = character_data.max_health
 	current_health = max_health
-	block = character_data.base_block
-	attack = character_data.base_attack
+
 	print("finished setting up stats for: ", character_data.character_name)
 
 func initialize_character_ui(character_data: CharacterData):
@@ -130,21 +125,11 @@ func setup_stats_ui_components(character_data: CharacterData):
 func take_basic_attack_damage(amount: int):
 	if amount <= 0: return
 
-	var damage_to_block = min(block, amount)
-	self.block -= damage_to_block
+	var damage_to_block = min(current_block, amount)
+	current_block -= damage_to_block
 
 	var remaining_damage = amount - damage_to_block
-	self.current_health -= remaining_damage
-
-func heal(amount: int):
-	if amount > 0:
-		current_health += amount
-
-func modify_attack(amount: int):
-	attack += amount
-
-func modify_block(amount: int):
-	block += amount
+	current_health -= remaining_damage
 
 # --- Targeting Logic (moved from Enemy.gd) ---
 

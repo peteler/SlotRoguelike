@@ -17,7 +17,7 @@ enum ActionType {
 @export var icon: Texture2D  # For intent display
 
 ## Action Values
-@export var damage_amount: int = 0
+@export var attack_amount: int = 0
 @export var block_amount: int = 0
 @export var heal_amount: int = 0
 @export var effect_duration: int = 1  # For buffs/debuffs
@@ -34,7 +34,7 @@ enum ActionType {
 func get_intent_description() -> String:
 	match action_type:
 		ActionType.ATTACK:
-			return "Attack for " + str(damage_amount) + " damage"
+			return "Attack for " + str(attack_amount) + " damage"
 		ActionType.DEFEND:
 			return "Gain " + str(block_amount) + " block"
 		ActionType.HEAL:

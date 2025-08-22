@@ -1,4 +1,4 @@
-# PlayerData.gd - Dynamic player save data that persists between different scene roots
+# PlayerData.gd - Dynamic player SAVE data that persists between different scene roots
 @tool
 class_name PlayerData
 extends Resource
@@ -7,14 +7,14 @@ extends Resource
 @export var class_data: PlayerClassData  # Reference to the class this character is
 var character_name = class_data.character_name if class_data else null
 
-## Core Stats (these change during a run)
+## turn Stats (these reset each turn)
+@export var turn_attack: int = 5
+@export var turn_block: int = 0
+
+## Current Stats (these change during gameplay)
+@export_group("Current Resources")
 @export var max_health: int = 30
 @export var current_health: int = 30
-@export var base_attack: int = 5
-@export var base_block: int = 0
-
-## Current Resources (these change during gameplay)
-@export_group("Current Resources")
 @export var symbol_pool: SymbolPool # Dynamic symbol pool
 @export var slot_count: int = 5  # Number of slots player currently has
 @export var current_mana: int = 3
@@ -36,20 +36,6 @@ var character_name = class_data.character_name if class_data else null
 @export var current_path: Array[String] = []  # Track which encounters were chosen
 @export var special_events_visited: Array[String] = [] # no duplicate events during runs
 
-##TODO: MAYBE THESE ARE GOOD WHEN SYMBOL EFFECTS ARE ACTUALLY ADDED, SOLVE SYMBOL SYSTEM FIRST !
-# Helper functions for resource management
-func get_total_health() -> int:
-	"""Get current max health including temporary bonuses"""
-	return max_health
-
-func get_total_attack() -> int:
-	"""Get current base attack including temporary bonuses"""
-	return base_attack
-
-func get_total_block() -> int:
-	"""Get current base block including temporary bonuses"""
-	return base_block
-
 # Symbol pool management functions
 func add_symbol_to_pool(symbol: SymbolData, amount: int = 1):
 	"""Add symbols to the player's pool"""
@@ -70,10 +56,6 @@ func can_afford(cost: int) -> bool:
 func gain_gold(amount: int):
 	"""Gain gold"""
 	gold += amount
-
-func heal_to_full():
-	"""Restore health to maximum"""
-	current_health = get_total_health()
 
 # Save/Load helpers
 func get_save_data():

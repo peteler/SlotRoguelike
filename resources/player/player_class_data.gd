@@ -7,7 +7,7 @@ extends CharacterData
 ## Starting Resources
 @export_group("Starting Resources & Stats")
 @export var symbol_pool: SymbolPool
-@export var mana: int = 3
+@export var starting_mana: int = 3
 @export var gold: int = 0
 
 ## Class-specific Mechanics
@@ -29,12 +29,10 @@ func create_starting_player_data() -> PlayerData:
 	new_player_data.class_data = self
 	new_player_data.max_health = max_health
 	new_player_data.current_health = max_health
-	new_player_data.base_attack = base_attack
-	new_player_data.base_block = base_block
 	
 	# Set starting resources
 	new_player_data.symbol_pool = symbol_pool.duplicate(true)
-	new_player_data.current_mana = mana
+	new_player_data.current_mana = starting_mana
 	new_player_data.max_mana = max_mana
 	new_player_data.mana_per_turn = mana_per_turn
 	new_player_data.gold = gold

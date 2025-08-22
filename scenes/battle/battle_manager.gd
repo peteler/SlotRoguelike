@@ -58,7 +58,6 @@ func _ready():
 	print("add_to_group called")
 	# initialization is called from gamecontroller
 
-
 # called once by GameController to initialize a battle encounter
 func initialize_battle(encounter_data: EncounterData, player_data: PlayerData):
 	"""Called by GameController to set up the battle with proper data"""
@@ -73,7 +72,7 @@ func initialize_battle(encounter_data: EncounterData, player_data: PlayerData):
 	spawn_player_character(player_data)
 	create_slot_machine(player_data)
 	
-	# Set up the encounter
+	# Set up the encounter (enemies)
 	setup_encounter(encounter_data)
 	
 	
@@ -161,7 +160,6 @@ func _on_character_targeted(character: Character):
 	end_targeting()
 
 func _on_character_died(character: Character):
-	## THIS IS THE CHANGE ##
 	# Handle character death and check for battle end conditions
 	if character is Enemy:
 		var enemy = character as Enemy
@@ -185,6 +183,7 @@ func _on_slot_roll_completed(symbols: Array[SymbolData]):
 	# This is called when the SlotMachine is done rolling.
 	# Make sure we are in the correct state to accept a roll.
 	if current_state != State.PLAYER_ROLL:
+		push_error("roll completed signal received while not in player_roll state")
 		return
 
 	# The SlotMachine now handles all symbol processing via SymbolProcessor
@@ -194,7 +193,6 @@ func _on_slot_roll_completed(symbols: Array[SymbolData]):
 	# Move to player action state - symbol effects have already been applied
 	enter_state(State.PLAYER_ACTION)
 
-# Attack button handler
 func _on_attack_button_pressed():
 	if current_state == State.PLAYER_ACTION:
 		start_attack_targeting()
@@ -224,10 +222,12 @@ func enter_state(new_state: State):
 			end_turn_button.disabled = true
 			# spell_panel.hide() # for later
 
-			# Reset turn stats from the previous turn
-			init_player_start_of_turn()
-			init_enemy_start_of_turn()
-			
+			# init start of player's turn for player & enemies
+			player_character.init_start_of_turn()
+			for enemy in enemies_container.get_children():
+				if enemy is Enemy and enemy.is_alive():
+					enemy.init_start_of_player_turn()
+
 
 		State.PLAYER_ACTION:
 			# The player has rolled, now they can act.
@@ -284,34 +284,16 @@ func start_attack_targeting():
 	
 	# TODO: Highlight enemies
 
-#TODO: spell system
+# TODO: spell system
 func start_spell_targeting(spell: Spell):
 	current_targeting_mode = TargetingMode.SPELL
 	current_spell = spell
 	enter_state(State.PLAYER_TARGETING)
 	
 	# TODO: Highlight valid targets
-
-func init_player_start_of_turn():
-	player_character.can_attack = true
-	player_character.attack = 0
-	player_character.block = 0
-
-# TODO: setup enemy intent system
-func init_enemy_start_of_turn():
-	pass
 # --------------------------------------------------
 
-# --- Player spawn & slot machine setup ---
-
-func setup_player_in_encounter(player: PlayerCharacter):
-	pass
-
-func place_player_in_encounter(player: PlayerCharacter):
-	pass
-# --------------------------------------------------
-
-# --- Encounter Management ---
+# --- Encounter Setup Management ---
 
 func setup_encounter(encounter_data: EncounterData):
 	"""Set up the battle from encounter data"""
@@ -386,21 +368,6 @@ func get_spawn_position(enemy_spawn: EnemySpawn) -> Vector2:
 func get_default_spawn_position() -> Vector2:
 	"""Fallback position when no spawn point is specified"""
 	return Vector2(600, 300)  # Adjust to your game's layout
-
-#func apply_spawn_modifiers(enemy: Enemy, spawn_config: EnemySpawn):
-	#"""Apply spawn-specific modifiers to an enemy"""
-	## Apply health modifier
-	#if spawn_config.health_multiplier != 1.0:
-		#enemy.max_health = int(enemy.max_health * spawn_config.health_multiplier)
-		#enemy.current_health = enemy.max_health
-	#
-	## Apply attack modifier (modify the enemy data's base attack)
-	#if spawn_config.attack_multiplier != 1.0 and enemy.enemy_data:
-		#enemy.enemy_data.base_attack = int(enemy.enemy_data.base_attack * spawn_config.attack_multiplier)
-	#
-	## Add extra actions
-	#if not spawn_config.give_extra_actions.is_empty():
-		#enemy.enemy_data.possible_actions.append_array(spawn_config.give_extra_actions)
 # --------------------------------------------------
 
 # --- Enemy Turn Order System ---
@@ -474,7 +441,6 @@ func handle_battle_lose():
 # --------------------------------------------------
 
 # --- Utility Functions ---
-
 func clear_enemies():
 	"""Clear all enemies from the battle"""
 	for enemy in enemies_container.get_children():
