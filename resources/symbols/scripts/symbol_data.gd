@@ -4,12 +4,17 @@ class_name SymbolData
 extends Resource
 
 enum TARGET_TYPE {
-	SELF,           # Applies to the player
-	SINGLE_ENEMY,   # Applies to one enemy
-	ALL_ENEMIES,    # Applies to all enemies
-	RANDOM_ENEMY,   # Applies to a random enemy
-	ALL_CHARACTERS, # Applies to everyone
-	NONE            # No target (global effects)
+	PLAYER_CHARACTER, # Applies to the player
+	SINGLE_ENEMY,     # Applies to one enemy
+	ALL_ENEMIES,      # Applies to all enemies
+	RANDOM_ENEMY,     # Applies to a random enemy
+	ALL_CHARACTERS,   # Applies to everyone
+	NONE              # No target (global effects)
+}
+enum APPLY_TIME {
+	FIRST,
+	BY_ORDER,
+	LAST
 }
 enum RARITY {
 	COMMON,
@@ -19,32 +24,39 @@ enum RARITY {
 	LEGENDARY
 }
 enum EDITION {
+	NORMAL
 	# like foil, polychrome, etc.. some additional random modifier
 }
+enum SPECIAL_EFFECT {
+	
+}
+
 @export var symbol_name: String = "Basic Symbol"
 @export var description: String = ""
 @export var texture: Texture2D
-@export var target_type: TARGET_TYPE = TARGET_TYPE.SELF
 @export var rarity: RARITY = RARITY.COMMON
-@export var edition: EDITION
 
-## Stat modifications (can be positive or negative)
-@export var health_effect: int = 0
-@export var mana_effect: int = 0
-@export var attack_effect: int = 0
-@export var block_effect: int = 0
+@export_group("Basic Stat Effect Arrays [MUST BE SAME SIZE]")
+# example: player heals 2 hp
+# stat_name[i] = current_health
+# stat_change_amount[i] = 2
+# target_type[i] = SymbolData.TARGET_TYPE.PLAYER_CHARACTER
+@export var basic_effect_stat_name: Array[String] = []
+@export var basic_effect_stat_change_amount: Array[int] = []
+@export var basic_effect_target_type: Array[TARGET_TYPE] = []
 
-# Special effect configuration
-@export var special_effect_id: String = ""  # References SymbolProcessor logic
-@export var effect_parameters: Dictionary = {}  # Configurable parameters
-@export var effect_script: GDScript
+@export_group("Special Effects [String, TARGET_TYPE]")
+# String = effect name [Apply Weak, Apply Strength , etc.]
+@export var special_effects: Dictionary[SPECIAL_EFFECT, TARGET_TYPE] = {}
 
-# Visual and audio
+@export_group("Custom Effects [GDScript, TARGET_TYPE]")
+@export var custom_effects: Dictionary[GDScript, TARGET_TYPE] = {}
+
+@export_group("Gameplay flags")
+@export var edition: EDITION = EDITION.NORMAL
+@export var apply_time: APPLY_TIME = APPLY_TIME.BY_ORDER
+
+@export_group("Visual and audio")
 @export var visual_effect_scene: PackedScene
 @export var sound_effect: AudioStream
 @export var animation_duration: float = 0.3
-
-# Gameplay flags
-@export var is_instant: bool = false  # Applied immediately vs on target
-@export var is_consumable: bool = false  # Removed after use
-@export var triggers_on_draw: bool = false  # Special symbols that activate when drawn

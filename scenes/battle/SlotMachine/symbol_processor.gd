@@ -8,144 +8,83 @@ func process_symbols_in_sequence(symbols: Array[SymbolData], delay_between: floa
 	"""Process an array of symbols with proper timing and effects"""
 	
 	# Separate instant and delayed effects
-	var instant_symbols = symbols.filter(func(s): return s.is_instant)
-	var delayed_symbols = symbols.filter(func(s): return not s.is_instant)
+	var first_symbols = symbols.filter(func(s): return s.apply_time == SymbolData.APPLY_TIME.FIRST)
+	var by_order_symbols = symbols.filter(func(s): return s.apply_time == SymbolData.APPLY_TIME.BY_ORDER)
+	var last_symbols = symbols.filter(func(s): return s.apply_time == SymbolData.APPLY_TIME.LAST)
 	
-	# Process instant effects immediately
-	for symbol in instant_symbols:
-		process_symbol_immediately(symbol)
+	for symbol in first_symbols:
+		apply_symbol_effects(symbol)
 	
-	# Process delayed effects with timing
-	for symbol in delayed_symbols:
-		await process_symbol_with_delay(symbol, delay_between)
+	for symbol in by_order_symbols:
+		apply_symbol_effects(symbol)
+		
+	for symbol in last_symbols:
+		apply_symbol_effects(symbol)
 	
 	Global.symbol_sequence_completed.emit(symbols)
 
-func process_symbol_immediately(symbol: SymbolData):
-	"""Apply symbol effects without delay or signals"""
-	var targets = get_targets_for_symbol(symbol)
+func apply_symbol_effects(symbol: SymbolData):
 	
-	for target in targets:
-		apply_symbol_to_target(symbol, target)
+	# handle basic effects
+	for i in range(symbol.basic_effect_stat_name.size()):
+		
+		var stat_name = symbol.basic_effect_stat_name[i]
+		var stat_change_amount = symbol.basic_effect_stat_change_amount[i]
+		var target_type = symbol.basic_effect_target_type[i]
+		
+		var targets = get_targets_by_target_type(target_type) # Array[Character]
+	
+		for target in targets:
+			target.modify_property_by_amount(stat_name, stat_change_amount)
+			# for vfx
+			Global.symbol_effect_applied.emit(symbol, target)
 
-func process_symbol_with_delay(symbol: SymbolData, delay: float):
-	"""Apply symbol effect with visual feedback and timing"""
-	Global.symbol_processing_started.emit(symbol)
 	
-	# Play visual effect
-	if symbol.visual_effect_scene:
-		play_visual_effect(symbol)
-	
-	# Get targets and apply effects
-	var targets = get_targets_for_symbol(symbol)
-	
-	for target in targets:
-		apply_symbol_to_target(symbol, target)
-		# Small delay between multiple targets
-		if targets.size() > 1:
-			await get_tree().create_timer(delay / targets.size()).timeout
-	
-	# Wait for animation to complete
-	await get_tree().create_timer(symbol.animation_duration).timeout
-	
-	Global.symbol_processing_completed.emit(symbol)
+	# handle special effects
+	for effect in symbol.special_effects:
+		var target_type = symbol.special_effects[effect]
+		
+		var targets = get_targets_by_target_type(target_type)
+		
+		for target in targets:
+			apply_special_effect_to_target(effect, target)
+			# for vfx
+			Global.symbol_effect_applied.emit(symbol, target)
 
-func apply_symbol_to_target(symbol: SymbolData, target: Character):
-	"""Apply a symbol's effects to a specific target"""
-	
-	# Apply basic stat effects
-	if symbol.health_effect != 0:
-		if symbol.health_effect > 0:
-			target.heal(symbol.health_effect)
+			
+	# handle custom effects
+	for effect in symbol.custom_effects:
+		var target_type = symbol.custom_effects[effect]
+		
+		var targets = get_targets_by_target_type(target_type)
+		
+		if targets.is_empty():
+			apply_custom_effect(effect)
 		else:
-			target.take_basic_attack_damage(abs(symbol.health_effect))
-	
-	if symbol.attack_effect != 0:
-		target.modify_attack(symbol.attack_effect)
-	
-	if symbol.block_effect != 0:
-		target.modify_block(symbol.block_effect)
-	
-	if symbol.mana_effect != 0 and target.has_method("modify_mana"):
-		target.modify_mana(symbol.mana_effect)
-	
-	# Apply special effects
-	if not symbol.special_effect_id.is_empty():
-		apply_special_effect(symbol, target)
-	
-	# Emit signal for any listeners
-	Global.symbol_effect_applied.emit(symbol, target)
+			for target in targets:
+				apply_custom_effect_to_target(effect, target)
+				# for vfx
+				Global.symbol_effect_applied.emit(symbol, target)
 
-func apply_special_effect(symbol: SymbolData, target: Character):
-	"""Handle complex symbol effects by ID"""
-	match symbol.special_effect_id:
-		"double_next_attack":
-			apply_double_next_attack(target, symbol.effect_parameters)
-		"heal_all_allies":
-			apply_heal_all_allies(symbol.effect_parameters)
-		"random_enemy_damage":
-			apply_random_enemy_damage(symbol.effect_parameters)
-		"steal_enemy_block":
-			apply_steal_enemy_block(target, symbol.effect_parameters)
-		"conditional_bonus":
-			apply_conditional_bonus(target, symbol.effect_parameters)
+#TODO:
+func apply_special_effect_to_target(effect: SymbolData.SPECIAL_EFFECT, target: Character):
+	"""Handle complex symbol effects by"""
+	match effect:
+		# TODO: maybe there's a better way?
 		_:
-			push_warning("Unknown special effect ID: " + symbol.special_effect_id)
-
-# Special effect implementations
-# TODO: add a custom script option, and filter these
-func apply_double_next_attack(target: Character, params: Dictionary):
-	"""Double the effect of the next attack symbol"""
-	# This would require a temporary buff system
-	print("Applied double next attack to ", target.name)
-
-func apply_heal_all_allies(params: Dictionary):
-	"""Heal all allied characters"""
-	var heal_amount = params.get("heal_amount", 5)
-	var player = get_tree().get_first_node_in_group("player_character")
-	if player:
-		player.heal(heal_amount)
-
-func apply_random_enemy_damage(params: Dictionary):
-	"""Deal damage to a random enemy"""
-	var damage = params.get("damage", 3)
-	var enemies = get_tree().get_nodes_in_group("enemies")
-	var alive_enemies = enemies.filter(func(e): return e.is_alive())
-	
-	if not alive_enemies.is_empty():
-		var target = alive_enemies[randi() % alive_enemies.size()]
-		target.take_basic_attack_damage(damage)
-
-func apply_steal_enemy_block(target: Character, params: Dictionary):
-	"""Steal block from enemies and give to target"""
-	var steal_amount = params.get("steal_amount", 2)
-	var enemies = get_tree().get_nodes_in_group("enemies")
-	
-	for enemy in enemies:
-		if enemy.is_alive() and enemy.block > 0:
-			var stolen = min(enemy.block, steal_amount)
-			enemy.modify_block(-stolen)
-			target.modify_block(stolen)
-			break
-
-func apply_conditional_bonus(target: Character, params: Dictionary):
-	"""Apply bonus effects based on conditions"""
-	var condition = params.get("condition", "")
-	var bonus_attack = params.get("bonus_attack", 0)
-	
-	match condition:
-		"low_health":
-			if float(target.current_health) / target.max_health < 0.3:
-				target.modify_attack(bonus_attack)
-		"high_block":
-			if target.block >= 5:
-				target.heal(params.get("bonus_heal", 3))
+			push_warning("Unknown special effect: ", effect)
+#TODO:
+func apply_custom_effect(effect: GDScript):
+	pass
+#TODO:
+func apply_custom_effect_to_target(effect: GDScript, target: Character):
+	pass
 
 # Utility functions
-func get_targets_for_symbol(symbol: SymbolData) -> Array:
+func get_targets_by_target_type(target_type: SymbolData.TARGET_TYPE) -> Array:
 	"""Determine targets for a symbol based on its target type"""
-	match symbol.target_type:
-		SymbolData.TARGET_TYPE.SELF:
+	match target_type:
+		SymbolData.TARGET_TYPE.PLAYER_CHARACTER:
 			var player = get_tree().get_first_node_in_group("player_character")
 			return [player] if player else []
 		

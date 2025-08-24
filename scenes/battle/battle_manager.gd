@@ -232,7 +232,7 @@ func enter_state(new_state: State):
 			# Disable roll, enable actions.
 			if slot_machine:
 				slot_machine.disable_roll()
-			attack_button.disabled = (player_character.attack <= 0) or (not player_character.can_attack)
+			attack_button.disabled = (player_character.turn_attack <= 0) or (not player_character.can_attack)
 			end_turn_button.disabled = false
 			# spell_panel.show() # for later
 

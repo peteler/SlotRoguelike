@@ -28,6 +28,7 @@ layout_mode = 2
 text = "intent text"
 
 [node name="HealthBar" type="TextureProgressBar" parent="."]
+layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 texture_under = SubResource("CanvasTexture_y811w")
@@ -38,6 +39,7 @@ offset_right = 40.0
 offset_bottom = 23.0
 
 [node name="BlockDisplay" type="HBoxContainer" parent="."]
+layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
@@ -46,5 +48,6 @@ layout_mode = 2
 text = "2"
 
 [node name="BuffDisplay" type="HBoxContainer" parent="."]
+layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0

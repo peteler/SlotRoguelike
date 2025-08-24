@@ -3,7 +3,7 @@
 class_name EnemyAction
 extends Resource
 
-enum ActionType {
+enum ACTION_TYPE {
 	ATTACK,          # Deal damage to player
 	DEFEND,          # Gain block
 	HEAL,            # Restore health
@@ -12,23 +12,29 @@ enum ActionType {
 	DEBUFF_PLAYER    # Weaken player
 }
 
+enum TARGET_TYPE {
+	SELF,
+	PLAYER_CHARACTER,
+	ALL ENEMIES,
+}
+
 @export var action_name: String = "Attack"
 @export var action_type: ActionType = ActionType.ATTACK
 @export var icon: Texture2D  # For intent display
 
-## Action Values
-@export var attack_amount: int = 0
-@export var block_amount: int = 0
-@export var heal_amount: int = 0
+@export_group("Basic Action Multipliers")
+@export var attack_multiplier: int = 1
+@export var block_multiplier: int = 1
+@export var heal_multiplier: int = 1
 @export var effect_duration: int = 1  # For buffs/debuffs
 
-## Action Requirements
+@export_group("Action Requirements")
 @export var min_health_percent: float = 0.0  # Only use when health >= this
 @export var max_health_percent: float = 1.0  # Only use when health <= this
 @export var cooldown_turns: int = 0  # Turns to wait before using again
 
-## Custom effect script (optional)
-@export var custom_effect_script: GDScript
+@export_group("Custom Action script (optional)")
+@export var custom_action_script: GDScript
 
 # Get a description of what this action will do
 func get_intent_description() -> String:

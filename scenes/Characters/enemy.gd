@@ -10,12 +10,10 @@ var turns_since_last_special: int = 0
 
 @onready var battle_ui: EnemyBattleUI = $EnemyBattleUI
 
-## These change during combat, EnemyActions use these 
+## These change during combat, EnemyActions use these, NOT WHAT'S ON DISPLAY!!!
 var attack_val: int
 var block_val: int
 
-##TODO: Intent display (UI element)
-# @onready var intent_display: Control = $IntentDisplay
 
 func _ready():
 	print("entered player's ready")

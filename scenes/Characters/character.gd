@@ -2,7 +2,14 @@
 class_name Character
 extends Area2D # We keep Area2D as the root for the built-in targeting.
 
-var max_health: int
+var max_health: int:
+	set(value):
+		max_health = clampi(value, 1, 999)
+		current_health = clampi(current_health, 0, max_health)
+		print("current health, max health for ", self, " is: ", current_health, max_health)
+		Global.character_health_updated.emit(self, current_health, max_health)
+		if not is_alive():
+			Global.character_died.emit(self)
 
 var current_health: int:
 	set(value):
@@ -14,7 +21,7 @@ var current_health: int:
 
 var current_block: int = 0:
 	set(value):
-		current_block = value
+		current_block = clampi(value, 0 , 999)
 		Global.character_block_updated.emit(self, current_block)
 
 @onready var sprite: Sprite2D = $Sprite2D
@@ -97,7 +104,6 @@ func setup_battle_ui_components(character_data: CharacterData, battle_ui: Charac
 	print("Configured UI components with local offsets")
 
 # --- Core Combat Functions ---
-
 func take_basic_attack_damage(amount: int):
 	if amount <= 0: return
 
@@ -108,12 +114,19 @@ func take_basic_attack_damage(amount: int):
 	current_health -= remaining_damage
 
 # --- Targeting Logic (moved from Enemy.gd) ---
-
 func _on_input_event(_viewport, event, _shape_idx):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed():
 		print("self: ", self)
 		# Let any listener (like the BattleManager) know this character was clicked.
 		Global.character_targeted.emit(self)
+
+# --- Symbol Processor Functions ---
+## ONLY USED BY SYMBOL PROCESSOR !
+func modify_property_by_amount(property_name: String, amount: int):
+	if property_name in self:
+		set(property_name, amount)
+	else:
+		push_error("Property '", property_name, "' does not exist on this object.")
 
 # --- Utility functions ---
 func is_alive() -> bool:
