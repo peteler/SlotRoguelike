@@ -19,7 +19,6 @@ var current_block: int = 0:
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
-@onready var character_battle_ui: Control = $CharacterBattleUI
 
 func _ready():
 	# Connect the built-in Area2D signal to our targeting function
@@ -28,33 +27,24 @@ func _ready():
 
 # --- Stats & UI initialization from character_data ---
 
-## INPUT: character_data OR player_data
+## CALLED ONCE by specific characters for ui setup
+## INPUT: data is character_data OR player_data
 ## [difference is character_data is a static resource and player_data is dynamic save data]
-func init_character_stats(character_data):
-	if not character_data:
-		push_error("character has no CharacterData/PlayerData assigned!")
-		return
-	
-	# init stats
-	max_health = character_data.max_health
+func init_character_battle_stats(data):
+	## init PlayerData & CharacterData mutual stats
+	max_health = data.max_health
 	current_health = max_health
-	current_block = character_data.starting_block
+	current_block = data.start_of_encounter_block
 
-	print("finished setting up stats for: ", character_data.character_name)
-
-func init_character_ui_from_data(character_data: CharacterData):
-	# Set sprite if available
+func init_character_battle_ui(character_data: CharacterData, battle_ui: CharacterBattleUI):
+	"""
+	Applies UI placement configuration from CharacterData.
+	Called once by the spceific character.
+	"""
+	
 	if sprite and character_data.sprite:
 		sprite.texture = character_data.sprite
 	
-	# Apply CollisionShape and Battle UI configuration
-	apply_character_battle_ui_placement(character_data)
-
-func apply_character_battle_ui_placement(character_data: CharacterData):
-	"""
-	Applies UI placement configuration from CharacterData.
-	Called once from initialize_character_ui_from_data.
-	"""
 	if not character_data or not sprite:
 		push_error("Missing CharacterData or Sprite2D for UI placement!")
 		return
@@ -67,48 +57,40 @@ func apply_character_battle_ui_placement(character_data: CharacterData):
 	
 	# Apply CollisionShape configuration
 	if collision_shape:
-		if character_data.auto_fit_collision:
-			# Auto-fit the collision shape to the sprite's size and scale.
-			collision_shape.shape = character_data.create_auto_collision_shape(sprite_size)
-			collision_shape.scale = character_data.get_effective_collision_scale(sprite_size)
-		elif character_data.custom_collision_shape:
-			# Use a manually defined collision shape from the resource.
-			collision_shape.shape = character_data.custom_collision_shape
-			collision_shape.scale = character_data.collision_scale
+		# Use a manually defined collision shape from the resource.
+		collision_shape.shape = character_data.custom_collision_shape
+		collision_shape.scale = character_data.collision_scale
 		
 		# Set the collision shape's position relative to the sprite.
 		collision_shape.position = sprite.position + character_data.collision_offset
 
 	# Apply Stats UI placement
-	if character_battle_ui:
-		# Get the correct offset based on sprite size.
-		var effective_offset = character_data.get_effective_stats_offset(sprite_size)
-		
+	if battle_ui:
 		# Get the anchor position relative to the sprite's local coordinates.
-		var anchor_pos = character_data.get_anchor_position(character_data.stats_ui_anchor, sprite_rect)
+		var anchor_pos = character_data.get_anchor_position(character_data.battle_ui_anchor, sprite_rect)
 		
-		# The stats UI is a child of the enemy node, so its position is relative to the enemy.
+		# The battle UI is a child of the character node, so its position is relative to the character.
 		# This positioning is correct for a UI node placed as a sibling to the Sprite2D.
-		character_battle_ui.position = anchor_pos + effective_offset
-		character_battle_ui.scale = character_data.stats_ui_scale
+		battle_ui.position = anchor_pos + character_data.battle_ui_offset
+		battle_ui.scale = character_data.battle_ui_scale
 		
-		print("Stats UI positioned at: ", character_battle_ui.position, " (anchor: ", character_data.stats_ui_anchor, ")")
+		print("battle UI positioned at: ", battle_ui.position, " (anchor: ", character_data.battle_ui_anchor, ")")
 	
-	# Setup individual UI components within StatsUI
-	setup_battle_ui_components(character_data)
+	# Setup individual UI components within battleUI
+	setup_battle_ui_components(character_data, battle_ui)
 
-func setup_battle_ui_components(character_data: CharacterData):
-	"""Position individual components within the StatsUI"""
-	if not character_battle_ui:
+func setup_battle_ui_components(character_data: CharacterData, battle_ui: CharacterBattleUI):
+	"""Position individual components within the battleUI"""
+	if not battle_ui:
 		return
 	
 	# Find health bar component
-	var health_bar = character_battle_ui.get_node_or_null("HealthBar")
+	var health_bar = battle_ui.get_node_or_null("HealthBar")
 	if health_bar:
 		health_bar.position = character_data.health_bar_local_offset
 
 	# Find block display component
-	var block_display = character_battle_ui.get_node_or_null("BlockDisplay")
+	var block_display = battle_ui.get_node_or_null("BlockDisplay")
 	if block_display:
 		block_display.position = character_data.block_display_local_offset
 	

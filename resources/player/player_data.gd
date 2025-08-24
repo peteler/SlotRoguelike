@@ -10,6 +10,7 @@ var character_name = class_data.character_name if class_data else null
 ## turn Stats (these reset each turn)
 @export var turn_attack: int = 5
 @export var turn_block: int = 0
+@export var start_of_encounter_block: int = 0
 
 ## Current Stats (these change during gameplay)
 @export_group("Current Resources")

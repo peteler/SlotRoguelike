@@ -8,7 +8,7 @@ var current_intent: EnemyAction
 var action_cooldowns: Dictionary = {}  # Track cooldowns for each action
 var turns_since_last_special: int = 0
 
-@onready var battle_ui: EnemyBattleUI
+@onready var battle_ui: EnemyBattleUI = $EnemyBattleUI
 
 ## These change during combat, EnemyActions use these 
 var attack_val: int
@@ -38,7 +38,6 @@ func initialize_from_enemy_data(data: EnemyData):
 	attack_val = data.base_attack
 	block_val = data.base_block
 
-
 # --- Turn Management (called by BattleManager) ---
 
 func start_turn():
@@ -57,8 +56,9 @@ func start_turn():
 
 func finish_turn():
 	"""Clean up after turn is complete"""
-	# is_my_turn = false
 	current_intent = null ## make sure display is gone too
+	if battle_ui and battle_ui.intent_display:
+		battle_ui.intent_display.visible = false
 	# TODO: update buff timers [if buffs last 3 turns this is where you update them]
 	
 	#TODO: Apply end-of-turn effects (DOT, buffs, etc.)
@@ -141,9 +141,12 @@ func get_available_actions() -> Array[EnemyAction]:
 		#return defend_actions[randi() % defend_actions.size()]
 	#
 	#return actions[randi() % actions.size()]
-#
+
 func select_weighted_action(actions: Array[EnemyAction]) -> EnemyAction:
 	"""Select action based on configured weights"""
+	if actions.is_empty():
+		push_error("No available actions for enemy: ", self)
+	
 	if enemy_data.action_weights.is_empty():
 		return actions[randi() % actions.size()]
 	
@@ -237,18 +240,38 @@ func execute_debuff_action():
 # --- EnemyBattleUI functions ---
 
 func init_battle_ui(data: EnemyData):
-	
+	if not battle_ui:
+		push_error("battle_ui not available when needed for enemy: ", self)
+		
 	# init base character data, stats, ui, etc.
-	init_character_stats(data) # only sets up health,max health for now
-	init_character_ui_from_data(data)
+	init_character_battle_stats(data) # only sets up health,max health for now
+	init_character_battle_ui(data, battle_ui)
 	
 	# init enemy specific UI
 	init_intent_ui(data)
 
+
 func init_intent_ui(data: EnemyData):
-	print("TODO: implement intent ui")
-	pass
+	"""
+	Applies UI placement configuration from EnemyData.
+	Called once from init_battle_ui.
+	"""
+	if not data or not sprite or not battle_ui.intent_display:
+		push_error("Missing EnemyData, Sprite2D, or IntentDisplay for UI placement!")
+		return
 	
+	# Get the sprite's bounding box in its local coordinate system.
+	var sprite_rect = sprite.get_rect()
+	
+	# Get the anchor position relative to the sprite's local coordinates.
+	var anchor_pos = data.get_anchor_position(data.intent_ui_anchor, sprite_rect)
+	
+	# Position the intent display relative to the main character node
+	battle_ui.intent_display.position = anchor_pos + data.intent_ui_offset
+	battle_ui.intent_display.scale = data.intent_ui_scale
+	
+	print("Intent UI positioned at: ", battle_ui.intent_display.position, " (anchor: ", data.intent_ui_anchor, ")")
+
 # --- Helper Functions ---
 
 func update_cooldowns():

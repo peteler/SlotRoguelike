@@ -1,8 +1,10 @@
-[gd_scene load_steps=2 format=3 uid="uid://dk4pjn07mwphr"]
+[gd_scene load_steps=3 format=3 uid="uid://dk4pjn07mwphr"]
 
 [ext_resource type="Script" uid="uid://dgjtdqggreyd1" path="res://scenes/battle/player_character_battle_ui.gd" id="1_qx2xt"]
 
-[node name="PlayerBattleUI" type="Control"]
+[sub_resource type="CanvasTexture" id="CanvasTexture_qx2xt"]
+
+[node name="PlayerCharacterBattleUI" type="Control"]
 layout_mode = 3
 anchors_preset = 0
 offset_left = 221.0
@@ -19,3 +21,25 @@ offset_bottom = 40.0
 [node name="AttackLabel" type="Label" parent="AttackDisplay"]
 layout_mode = 2
 text = "4"
+
+[node name="HealthBar" type="TextureProgressBar" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+texture_under = SubResource("CanvasTexture_qx2xt")
+
+[node name="HealthLabel" type="Label" parent="HealthBar"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="BlockDisplay" type="HBoxContainer" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="BlockLabel" type="Label" parent="BlockDisplay"]
+layout_mode = 2
+text = "2"
+
+[node name="BuffDisplay" type="HBoxContainer" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0

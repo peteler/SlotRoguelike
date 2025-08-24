@@ -10,11 +10,6 @@ var character: Character
 func _ready():
 	Global.character_block_updated.connect(_on_character_block_updated)
 	Global.character_health_updated.connect(_on_character_health_updated)
-	
-	## is this needed?
-	#character = get_parent() as Character
-	#if character:
-	#	_on_character_block_updated(character, character.block)
 
 func _on_character_block_updated(updated_character: Character, block: int):
 	# Only update if this is our character

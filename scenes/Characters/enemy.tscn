@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bb3ufquxn4dcf" path="res://scenes/characters/enemy.gd" id="1_jbtib"]
 [ext_resource type="Texture2D" uid="uid://bb0d3y7l184lh" path="res://assets/bad_frog.png" id="2_wg2a8"]
-[ext_resource type="PackedScene" uid="uid://dk4pjn07mwphr" path="res://scenes/battle/player_character_battle_ui.tscn" id="3_hc2n6"]
+[ext_resource type="PackedScene" uid="uid://cnysvcqqidsea" path="res://scenes/ui/enemy_battle_ui.tscn" id="3_f2e6v"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_q03n0"]
 size = Vector2(135, 257)
@@ -18,10 +18,4 @@ shape = SubResource("RectangleShape2D_q03n0")
 position = Vector2(-0.5, -129)
 texture = ExtResource("2_wg2a8")
 
-[node name="StatsUI" parent="." instance=ExtResource("3_hc2n6")]
-offset_left = -24.0
-offset_top = -294.0
-offset_right = 16.0
-offset_bottom = -254.0
-size_flags_horizontal = 4
-size_flags_vertical = 0
+[node name="EnemyBattleUI" parent="." instance=ExtResource("3_f2e6v")]

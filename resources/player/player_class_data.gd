@@ -20,6 +20,9 @@ extends CharacterData
 @export_group("Progression")
 @export var class_symbol_types: Array[SymbolData] = []  # For encounter rewards
 
+## UI placement
+@export var attack_display_local_offset: Vector2 = Vector2(0, 25)
+
 # Helper function to create starting PlayerData for this class
 func create_starting_player_data() -> PlayerData:
 	"""Create a new PlayerData with this class's starting values"""

@@ -3,7 +3,7 @@
 class_name EnemyData
 extends CharacterData
 
-## base enemy stats (used only by enemy for intent system)
+## base enemy stats (used only by enemy for action system)
 @export var base_attack: int = 5
 @export var base_block: int = 2
 
@@ -22,3 +22,9 @@ extends CharacterData
 @export_group("Rewards")
 @export var symbol_rewards: Array[SymbolData] = []  # Symbols player can gain
 @export var reward_count: int = 1  # How many symbols to give
+
+## Enemy Intent UI placement
+@export_group("Intent UI Placement")
+@export var intent_ui_offset: Vector2 = Vector2(0, -100)  # Relative to sprite center
+@export var intent_ui_anchor: String = "top_center"  # Where to anchor the UI
+@export var intent_ui_scale: Vector2 = Vector2.ONE
