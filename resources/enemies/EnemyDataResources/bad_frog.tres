@@ -8,6 +8,8 @@
 
 [resource]
 script = ExtResource("3_hmm64")
+base_attack = 5
+base_block = 4
 ai_type = "aggressive"
 attack_frequency = 0.8
 special_ability_cooldown = 3
@@ -18,8 +20,6 @@ reward_count = 1
 character_name = "bad frog"
 sprite = ExtResource("1_12onl")
 max_health = 30
-base_attack = 5
-base_block = 4
 collision_offset = Vector2(0, 0)
 collision_scale = Vector2(1, 1)
 auto_fit_collision = true

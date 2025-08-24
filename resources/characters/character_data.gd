@@ -7,6 +7,7 @@ extends Resource
 @export var character_name: String = "character"
 @export var sprite: Texture2D
 @export var max_health: int = 30
+@export var starting_block: int = 0
 
 ## UI Placement Configuration
 @export_group("UI Placement")

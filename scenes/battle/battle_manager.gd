@@ -148,11 +148,9 @@ func _on_character_targeted(character: Character):
 	
 	# Handle based on current targeting mode
 	match current_targeting_mode:
+		
 		TargetingMode.ATTACK:
-			var damage = player_character.calc_and_return_basic_attack_damage()
-			enemy_node.take_basic_attack_damage(damage)
-			# Disable attack for this turn [ TODO: switch to function for modularity]
-			player_character.can_attack = false
+			player_character.perform_basic_attack(enemy_node)
 		TargetingMode.SPELL:
 			pass
 	
@@ -226,7 +224,7 @@ func enter_state(new_state: State):
 			player_character.init_start_of_turn()
 			for enemy in enemies_container.get_children():
 				if enemy is Enemy and enemy.is_alive():
-					enemy.init_start_of_player_turn()
+					enemy.call_on_start_of_player_turn()
 
 
 		State.PLAYER_ACTION:

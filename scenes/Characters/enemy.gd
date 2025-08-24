@@ -8,7 +8,9 @@ var current_intent: EnemyAction
 var action_cooldowns: Dictionary = {}  # Track cooldowns for each action
 var turns_since_last_special: int = 0
 
-## These change during combat, EnemyActions use these implicitly
+@onready var battle_ui: EnemyBattleUI
+
+## These change during combat, EnemyActions use these 
 var attack_val: int
 var block_val: int
 
@@ -26,9 +28,8 @@ func _ready():
 
 func initialize_from_enemy_data(data: EnemyData):
 	"""Initialize enemy specific features from EnemyData resource"""
-	# init base character data, stats, ui, etc.
-	initialize_character_stats(data) # only sets up health,max health for now
-	initialize_character_ui(data)
+	
+	init_battle_ui(data)
 	
 	## Initialize specific enemy data
 	for action in enemy_data.possible_actions:
@@ -47,8 +48,8 @@ func start_turn():
 	# Reduce cooldowns at start of turn
 	update_cooldowns()
 	
-	# AI decision making and execution
-	select_intent() ## shouldnt be here, should be selected when entering player_roll! here just execute
+	# AI execution
+	
 	await execute_current_intent()
 	
 	# Clean up turn state
@@ -58,39 +59,40 @@ func finish_turn():
 	"""Clean up after turn is complete"""
 	# is_my_turn = false
 	current_intent = null ## make sure display is gone too
+	# TODO: update buff timers [if buffs last 3 turns this is where you update them]
 	
 	#TODO: Apply end-of-turn effects (DOT, buffs, etc.)
 
+## called by battle_manager when player's turn start [entering PLAYER_ROLL state]
+func call_on_start_of_player_turn():
+	select_intent()
+
+# --- intent system ---
 func select_intent():
-	"""Choose what action to take this turn"""
+	"""Choose what action to take in upcoming turn"""
 	if not enemy_data or enemy_data.possible_actions.is_empty():
-		# Fallback: basic attack
-		current_intent = create_basic_attack_action()
+		push_error("no enemy_data/ enemy_data.possible_actions")
 		return
 	
 	var available_actions = get_available_actions()
 	
-	if available_actions.is_empty():
-		# All actions on cooldown, use basic attack
-		current_intent = create_basic_attack_action()
-		return
-	
 	# Select action based on AI type
 	match enemy_data.ai_type:
-		"aggressive":
-			current_intent = select_aggressive_action(available_actions)
-		"defensive":
-			current_intent = select_defensive_action(available_actions)
-		"random":
-			current_intent = available_actions[randi() % available_actions.size()]
-		"custom":
-			current_intent = select_custom_action(available_actions)
+		## TODO: rework enemy AI:
+		#"aggressive":
+			#current_intent = select_aggressive_action(available_actions)
+		#"defensive":
+			#current_intent = select_defensive_action(available_actions)
+		#"random":
+			#current_intent = available_actions[randi() % available_actions.size()]
+		#"custom":
+			#current_intent = select_custom_action(available_actions)
 		_:
 			current_intent = select_weighted_action(available_actions)
 	
-	#TODO: Show intent to player
+	#TODO: Show intent to player ---- probably best by adding another ui child element? that's inside enemy_data
 
-	Global.enemy_intent_selected.emit(self, current_intent)
+	Global.enemy_intent_updated.emit(self, current_intent)
 
 func get_available_actions() -> Array[EnemyAction]:
 	"""Get actions that can be used this turn"""
@@ -111,34 +113,35 @@ func get_available_actions() -> Array[EnemyAction]:
 		available.append(action)
 	
 	return available
-
-func select_aggressive_action(actions: Array[EnemyAction]) -> EnemyAction:
-	"""Prioritize attacks and damage-dealing abilities"""
-	var attack_actions = actions.filter(func(a): return a.action_type == EnemyAction.ActionType.ATTACK)
-	if not attack_actions.is_empty():
-		return attack_actions[randi() % attack_actions.size()]
-	
-	var special_actions = actions.filter(func(a): return a.action_type == EnemyAction.ActionType.SPECIAL_ABILITY)
-	if not special_actions.is_empty():
-		return special_actions[randi() % special_actions.size()]
-	
-	return actions[randi() % actions.size()]
-
-func select_defensive_action(actions: Array[EnemyAction]) -> EnemyAction:
-	"""Prioritize defense and healing when health is low"""
-	var health_percent = float(current_health) / float(max_health)
-	
-	if health_percent < 0.5:
-		var heal_actions = actions.filter(func(a): return a.action_type == EnemyAction.ActionType.HEAL)
-		if not heal_actions.is_empty():
-			return heal_actions[randi() % heal_actions.size()]
-	
-	var defend_actions = actions.filter(func(a): return a.action_type == EnemyAction.ActionType.DEFEND)
-	if not defend_actions.is_empty():
-		return defend_actions[randi() % defend_actions.size()]
-	
-	return actions[randi() % actions.size()]
-
+# ---------------------------------
+## TODO: rework enemy AI:
+#func select_aggressive_action(actions: Array[EnemyAction]) -> EnemyAction:
+	#"""Prioritize attacks and damage-dealing abilities"""
+	#var attack_actions = actions.filter(func(a): return a.action_type == EnemyAction.ActionType.ATTACK)
+	#if not attack_actions.is_empty():
+		#return attack_actions[randi() % attack_actions.size()]
+	#
+	#var special_actions = actions.filter(func(a): return a.action_type == EnemyAction.ActionType.SPECIAL_ABILITY)
+	#if not special_actions.is_empty():
+		#return special_actions[randi() % special_actions.size()]
+	#
+	#return actions[randi() % actions.size()]
+#
+#func select_defensive_action(actions: Array[EnemyAction]) -> EnemyAction:
+	#"""Prioritize defense and healing when health is low"""
+	#var health_percent = float(current_health) / float(max_health)
+	#
+	#if health_percent < 0.5:
+		#var heal_actions = actions.filter(func(a): return a.action_type == EnemyAction.ActionType.HEAL)
+		#if not heal_actions.is_empty():
+			#return heal_actions[randi() % heal_actions.size()]
+	#
+	#var defend_actions = actions.filter(func(a): return a.action_type == EnemyAction.ActionType.DEFEND)
+	#if not defend_actions.is_empty():
+		#return defend_actions[randi() % defend_actions.size()]
+	#
+	#return actions[randi() % actions.size()]
+#
 func select_weighted_action(actions: Array[EnemyAction]) -> EnemyAction:
 	"""Select action based on configured weights"""
 	if enemy_data.action_weights.is_empty():
@@ -159,9 +162,9 @@ func select_weighted_action(actions: Array[EnemyAction]) -> EnemyAction:
 	
 	return actions[0]
 
-func select_custom_action(actions: Array[EnemyAction]) -> EnemyAction:
-	"""Override this in enemy-specific scripts for custom AI"""
-	return actions[randi() % actions.size()]
+#func select_custom_action(actions: Array[EnemyAction]) -> EnemyAction:
+	#"""Override this in enemy-specific scripts for custom AI"""
+	#return actions[randi() % actions.size()]
 
 # --- Action Execution ---
 
@@ -178,9 +181,9 @@ func execute_current_intent():
 	
 	match current_intent.action_type:
 		EnemyAction.ActionType.ATTACK:
-			await execute_attack_action()
+			await execute_basic_attack_action()
 		EnemyAction.ActionType.DEFEND:
-			await execute_defend_action()
+			await execute_basic_defend_action()
 		EnemyAction.ActionType.HEAL:
 			await execute_heal_action()
 		EnemyAction.ActionType.SPECIAL_ABILITY:
@@ -205,14 +208,8 @@ func execute_basic_attack_action():
 func execute_basic_defend_action():
 	"""Gain block"""
 	if block_val > 0:
-		modify_block(current_intent.block_amount)
+		current_block = block_val
 		await get_tree().create_timer(0.2).timeout
-
-func execute_heal_action():
-	"""Restore health"""
-	if current_intent.heal_amount > 0:
-		heal(current_intent.heal_amount)
-		await get_tree().create_timer(0.3).timeout
 
 func execute_special_action():
 	"""Execute custom special ability"""
@@ -221,6 +218,9 @@ func execute_special_action():
 		if effect_instance.has_method("execute_effect"):
 			effect_instance.execute_effect(self, current_intent)
 	await get_tree().create_timer(0.4).timeout
+
+func execute_heal_action():
+	pass
 
 func execute_buff_action():
 	"""Apply temporary buff to self"""
@@ -234,6 +234,21 @@ func execute_debuff_action():
 	print("Debuff action not yet implemented")
 	await get_tree().create_timer(0.2).timeout
 
+# --- EnemyBattleUI functions ---
+
+func init_battle_ui(data: EnemyData):
+	
+	# init base character data, stats, ui, etc.
+	init_character_stats(data) # only sets up health,max health for now
+	init_character_ui_from_data(data)
+	
+	# init enemy specific UI
+	init_intent_ui(data)
+
+func init_intent_ui(data: EnemyData):
+	print("TODO: implement intent ui")
+	pass
+	
 # --- Helper Functions ---
 
 func update_cooldowns():

@@ -1,0 +1,26 @@
+[gd_scene load_steps=3 format=3 uid="uid://cnysvcqqidsea"]
+
+[ext_resource type="Script" uid="uid://b8cuyi6lhoflc" path="res://scenes/ui/enemy_battle_ui.gd" id="1_y811w"]
+[ext_resource type="Texture2D" uid="uid://b3cgae1xahvhy" path="res://icon.svg" id="2_y811w"]
+
+[node name="EnemyBattleUI" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 221.0
+offset_top = 255.0
+offset_right = 261.0
+offset_bottom = 295.0
+script = ExtResource("1_y811w")
+
+[node name="IntentDisplay" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="IntentIcon" type="TextureRect" parent="IntentDisplay"]
+layout_mode = 2
+texture = ExtResource("2_y811w")
+
+[node name="IntentLabel" type="Label" parent="IntentDisplay"]
+layout_mode = 2
+text = "intent text"

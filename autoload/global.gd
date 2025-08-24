@@ -12,11 +12,13 @@ signal character_targeted(character: Character)
 signal character_died(character: Character)
 signal character_health_updated(character: Character, current_health: int, max_health: int)
 signal character_block_updated(character: Character, block_amount: int)
-signal character_attack_updated(character: Character, attack_amount: int)
+
+# Player Specific Events
+signal player_character_attack_updated(player_character: PlayerCharacter, attack_amount: int)
 signal player_mana_updated(current_mana: int) 
 
 # Enemy Specific Events
-signal enemy_intent_selected(enemy: Enemy, action: EnemyAction)
+signal enemy_intent_updated(enemy: Enemy, action: EnemyAction)
 signal enemy_action_executed(enemy: Enemy, action: EnemyAction)
 
 # Slot Machine Events

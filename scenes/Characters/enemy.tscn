@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bb3ufquxn4dcf" path="res://scenes/characters/enemy.gd" id="1_jbtib"]
 [ext_resource type="Texture2D" uid="uid://bb0d3y7l184lh" path="res://assets/bad_frog.png" id="2_wg2a8"]
-[ext_resource type="PackedScene" uid="uid://dk4pjn07mwphr" path="res://scenes/battle/stats_ui.tscn" id="3_hc2n6"]
+[ext_resource type="PackedScene" uid="uid://dk4pjn07mwphr" path="res://scenes/battle/player_character_battle_ui.tscn" id="3_hc2n6"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_q03n0"]
 size = Vector2(135, 257)
