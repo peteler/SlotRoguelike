@@ -50,7 +50,6 @@ func init_character_battle_ui(character_data: CharacterData, battle_ui: Characte
 	if sprite and character_data.sprite:
 		sprite.texture = character_data.sprite
 	
-	
 	if not character_data or not sprite:
 		push_error("Missing CharacterData or Sprite2D for UI placement!")
 		return
@@ -161,9 +160,14 @@ func _on_input_event(_viewport, event, _shape_idx):
 ## ONLY USED BY SYMBOL PROCESSOR !
 func modify_property_by_amount(property_name: String, amount: int):
 	if property_name in self:
-		set(property_name, amount)
+		set(property_name, get(property_name) + amount)
 	else:
 		push_error("Property '", property_name, "' does not exist on this object.")
+
+# --- Battle States Helpers ---
+## @override
+func call_on_start_of_player_turn():
+	pass
 
 # --- Utility functions ---
 func is_alive() -> bool:

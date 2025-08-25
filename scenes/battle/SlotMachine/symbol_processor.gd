@@ -32,7 +32,7 @@ func apply_symbol_effects(symbol: SymbolData):
 		var stat_change_amount = symbol.basic_effect_stat_change_amount[i]
 		var target_type = symbol.basic_effect_target_type[i]
 		
-		var targets = Global.get_targets_by_target_type(target_type) # Array[Character]
+		var targets = GlobalBattle.get_targets_by_target_type(target_type, null) # Array[Character]
 	
 		for target in targets:
 			target.modify_property_by_amount(stat_name, stat_change_amount)

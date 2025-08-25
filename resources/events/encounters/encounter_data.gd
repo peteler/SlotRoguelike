@@ -1,4 +1,5 @@
 # EncounterData.gd - Add map generation properties
+@tool
 class_name EncounterData
 extends EventData
 

@@ -35,3 +35,4 @@ func _on_player_character_attack_updated(updated_character: PlayerCharacter, att
 	if updated_character == player_character:
 		attack_label.text = str(attack)
 		attack_label.visible = attack > 0
+		print("updated player attack to: ", attack)

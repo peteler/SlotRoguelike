@@ -5,12 +5,16 @@
 
 [resource]
 script = ExtResource("1_2u7ws")
-texture = ExtResource("2_lfi3j")
 symbol_name = "Symbol"
-target_type = null
-is_instant_effect = null
-health_effect = null
-mana_effect = null
-attack_effect = 2
-block_effect = null
+description = ""
+texture = ExtResource("2_lfi3j")
+rarity = 0
+basic_effect_stat_name = Array[String](["turn_attack"])
+basic_effect_stat_change_amount = Array[int]([2])
+basic_effect_target_type = Array[int]([1])
+special_effects = Dictionary[int, int]({})
+custom_effects = Dictionary[GDScript, int]({})
+edition = 0
+apply_time = 1
+animation_duration = 0.3
 metadata/_custom_type_script = "uid://dwxqiops6h6f5"

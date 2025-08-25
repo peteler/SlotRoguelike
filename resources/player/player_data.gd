@@ -5,7 +5,7 @@ extends Resource
 
 ## Core Identity
 @export var class_data: PlayerClassData  # Reference to the class this character is
-var character_name = class_data.character_name if class_data else null
+var character_name = class_data.character_name if class_data else "no_name"
 
 ## turn Stats (these reset each turn)
 @export var turn_attack: int = 5

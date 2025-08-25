@@ -3,12 +3,12 @@ class_name PlayerCharacter
 extends Character
 
 ## parent vars
-#var max_health: int
-#var current_health: int:
-#var current_block: int = 0:
 #@onready var sprite: Sprite2D = $Sprite2D
 #@onready var collision_shape: CollisionShape2D = $CollisionShape2D
 #@onready var stats_ui: Control = $StatsUI
+#var max_health: int
+#var current_health: int:
+#var current_block: int = 0:
 
 ## Player-specific stats
 var current_mana: int = 0:
@@ -44,19 +44,22 @@ func _ready():
 
 func initialize_from_player_data():
 	"""Initialize player character from PlayerData resource"""
-	# init all player character battle ui
-	init_battle_ui()
+	# init base character stats
+	init_character_battle_stats(player_data)
+	# init battle_ui based on CharacterData
+	init_character_battle_ui(player_data.class_data, battle_ui)
 	
-	# Set player-specific stats
+	# initialize player-specific battle ui
+	var attack_display = battle_ui.get_node_or_null("AttackDisplay")
+	if attack_display:
+		print("attack_display present")
+		battle_ui.attack_display.position = player_data.class_data.attack_display_local_offset
+	
+	# initialize player-specific stats
 	current_mana = player_data.current_mana
-	
-	# Apply any temporary modifiers
-	max_health = player_data.max_health
-	current_health = player_data.current_health
 	
 	print("Player character initialized: ", player_data.character_name)
 
-#TODO: add this function
 func perform_basic_attack(target: Character):
 	target.take_basic_attack_damage(turn_attack)
 	can_attack = false
@@ -64,11 +67,10 @@ func perform_basic_attack(target: Character):
 ## Override take_basic_attack_damage to add player-specific effects
 func take_basic_attack_damage(amount: int):
 	super.take_basic_attack_damage(amount)
-	
 	# Add screen shake, damage effects, etc. here
 	add_damage_effect()
 
-func init_start_of_turn():
+func call_on_start_of_player_turn():
 	can_attack = true
 	turn_attack = 0
 	current_block = 0
@@ -78,20 +80,3 @@ func add_damage_effect():
 	"""Add visual/audio effects when player takes damage"""
 	# TODO: Add screen shake, damage popup, sound effect
 	print("Player took damage!")
-
-# --- PlayerBattleUI ---
-
-func init_battle_ui():
-	# init base character stats
-	init_character_battle_stats(player_data)
-	
-	init_character_battle_ui(player_data.class_data, battle_ui)
-	
-	# initialize player specific battle ui
-	var attack_display = battle_ui.get_node_or_null("AttackDisplay")
-	if attack_display:
-		print("attack_display present")
-		battle_ui.attack_display.position = player_data.class_data.attack_display_local_offset
-
-
-## Player death is handled by the Global.character_died signal in BattleManager

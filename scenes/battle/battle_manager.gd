@@ -104,8 +104,9 @@ func spawn_player_character(player_data: PlayerData):
 	player_character.player_data = player_data
 	
 	# Position at spawn point
-	var spawn_offset = player_data.class_data.spawn_offset
+	
 	if player_spawn:
+		var spawn_offset = player_data.class_data.spawn_offset
 		player_character.global_position = player_spawn.global_position + spawn_offset
 	
 	# Add to scene
@@ -217,7 +218,7 @@ func enter_state(new_state: State):
 			# spell_panel.hide() # for later
 
 			# init start of player's turn for player & enemies
-			player_character.init_start_of_turn()
+			player_character.call_on_start_of_player_turn()
 			for enemy in enemies_container.get_children():
 				if enemy is Enemy and enemy.is_alive():
 					enemy.call_on_start_of_player_turn()

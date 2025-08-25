@@ -25,6 +25,7 @@ func enable_roll():
 
 func disable_roll():
 	roll_button.disabled = true
+
 # called once from game_controller when setting up battle_manager
 func init_from_player_data(player_data: PlayerData):
 	

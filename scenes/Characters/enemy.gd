@@ -169,6 +169,7 @@ func get_available_actions() -> Array[EnemyAction]:
 	
 	return available
 # ---------------------------------
+
 ## TODO: rework enemy AI:
 #func select_aggressive_action(actions: Array[EnemyAction]) -> EnemyAction:
 	#"""Prioritize attacks and damage-dealing abilities"""

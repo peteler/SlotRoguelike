@@ -20,7 +20,6 @@ offset_bottom = 40.0
 
 [node name="AttackLabel" type="Label" parent="AttackDisplay"]
 layout_mode = 2
-text = "4"
 
 [node name="HealthBar" type="TextureProgressBar" parent="."]
 layout_mode = 0
@@ -40,7 +39,6 @@ offset_bottom = 40.0
 
 [node name="BlockLabel" type="Label" parent="BlockDisplay"]
 layout_mode = 2
-text = "2"
 
 [node name="BuffDisplay" type="HBoxContainer" parent="."]
 layout_mode = 0
