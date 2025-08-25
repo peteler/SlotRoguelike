@@ -27,6 +27,6 @@ battle_ui_offset = Vector2(0, -50)
 battle_ui_anchor = "top_center"
 battle_ui_scale = Vector2(1, 1)
 health_bar_local_offset = Vector2(-15, 200)
-block_display_local_offset = Vector2(-40, 25)
+block_display_local_offset = Vector2(-40, 15)
 spawn_offset = Vector2(0, -40)
 metadata/_custom_type_script = "uid://ctfn7l7j5y8ja"

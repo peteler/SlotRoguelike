@@ -400,7 +400,7 @@ func execute_enemy_turns():
 
 	for enemy in turn_order:
 		if enemy.is_alive():
-			await enemy.start_turn()
+			await enemy.play_turn()
 	
 	Global.all_enemy_turns_completed.emit()
 # --------------------------------------------------

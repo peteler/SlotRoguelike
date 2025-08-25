@@ -4,8 +4,8 @@ class_name EnemyData
 extends CharacterData
 
 ## stat levels, affect actions of same type
-@export var attack_level: int = 5
-@export var block_level: int = 2
+@export var attack_level: int = 1
+@export var block_level: int = 1
 @export var heal_level: int = 0
 @export var buff_level: int = 0
 

@@ -4,7 +4,7 @@ class_name SymbolPool
 extends Resource
 
 # Changed from Array to Dictionary to track quantities
-@export var available_symbols: Dictionary = {}  # {SymbolData: quantity}
+@export var available_symbols: Dictionary[SymbolData, int] = {}  # {SymbolData: quantity}
 
 # Track symbols for current roll (temporary state)
 var _current_roll_pool: Array[SymbolData] = []

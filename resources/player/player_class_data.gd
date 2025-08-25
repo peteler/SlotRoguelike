@@ -22,23 +22,3 @@ extends CharacterData
 
 ## UI placement
 @export var attack_display_local_offset: Vector2 = Vector2(0, 25)
-
-# Helper function to create starting PlayerData for this class
-func create_starting_player_data() -> PlayerData:
-	"""Create a new PlayerData with this class's starting values"""
-	var new_player_data = PlayerData.new()
-	
-	# Copy class data to player data
-	new_player_data.class_data = self
-	new_player_data.max_health = max_health
-	new_player_data.current_health = max_health
-	
-	# Set starting resources
-	new_player_data.symbol_pool = symbol_pool.duplicate(true)
-	new_player_data.current_mana = starting_mana
-	new_player_data.max_mana = max_mana
-	new_player_data.mana_per_turn = mana_per_turn
-	new_player_data.gold = gold
-	
-	
-	return new_player_data

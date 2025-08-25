@@ -5,13 +5,12 @@
 
 [resource]
 script = ExtResource("1_71lad")
-action_name = "Slash"
+action_name = "basic_attack"
 action_type = 0
 icon = ExtResource("1_4rk35")
-damage_amount = 8
-block_amount = 0
-heal_amount = 0
-effect_duration = 1
+icon_scale_factor = 0.4
+multiplier = 1
+target_type = 1
 min_health_percent = 0.0
 max_health_percent = 1.0
 cooldown_turns = 0

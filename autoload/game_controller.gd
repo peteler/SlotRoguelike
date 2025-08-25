@@ -43,9 +43,8 @@ func start_new_game():
 	"""Initialize new game and go to map"""
 	# Create fresh player data from class
 	if test_class:
-		player_data = test_class.create_starting_player_data()
+		player_data = create_new_player_data_from_class_data(test_class)
 
-	
 	# Go to map
 	change_scene_to(MAP_SCENE)
 
@@ -128,6 +127,25 @@ func load_game():
 	"""Load saved game state (implement as needed)"""
 	# TODO: Implement save system
 	pass
+
+func create_new_player_data_from_class_data(class_data: PlayerClassData) -> PlayerData:
+	"""Create a new PlayerData with this class's starting values"""
+	var new_player_data = PlayerData.new()
+	
+	# Copy class data to player data
+	new_player_data.class_data = class_data
+	new_player_data.max_health = class_data.max_health
+	new_player_data.current_health = class_data.max_health
+	
+	# Set starting resources
+	new_player_data.symbol_pool = class_data.symbol_pool.duplicate(true)
+	new_player_data.current_mana = class_data.starting_mana
+	new_player_data.max_mana = class_data.max_mana
+	new_player_data.mana_per_turn = class_data.mana_per_turn
+	new_player_data.gold = class_data.gold
+	
+	
+	return new_player_data
 
 func get_player_data_reference() -> PlayerData:
 	"""Get reference to player data - adapt this to your game's architecture"""

@@ -67,9 +67,8 @@ func initialize_from_enemy_data(data: EnemyData):
 
 # --- Turn Management (called by BattleManager) ---
 
-func start_turn():
+func play_turn():
 	"""Called by BattleManager when it's this enemy's turn"""
-	print("entered start_turn for, ", self)
 	
 	# Reduce cooldowns at start of turn
 	update_cooldowns()
@@ -116,10 +115,16 @@ func select_intent():
 			#current_intent = select_custom_action(available_actions)
 		_:
 			current_intent = select_weighted_action(available_actions)
-	
+	if not current_intent:
+		push_error("current_intent is null for ", self)
+		return
+		
 	# update action's value and targets to current intent, setter signals for ui change
+	
 	curr_action_val = get_current_intent_action_value()
+	print("current intent is: ", current_intent)
 	curr_action_targets = get_current_intent_targets()
+	print("select intent finished, intent: ", current_intent)
 
 # on enemy buff/ debuff, i need to change the action value since it's updated
 func _on_enemy_level_changed(enemy: Enemy):
@@ -127,17 +132,18 @@ func _on_enemy_level_changed(enemy: Enemy):
 		curr_action_val = get_current_intent_action_value()
 
 func get_current_intent_action_value():
-	match current_intent.ACTION_TYPE:
+	match current_intent.action_type:
 		EnemyAction.ACTION_TYPE.ATTACK:
+			print("current_intent.multiplier,  curr_attack_level: ", current_intent.multiplier, curr_attack_level)
 			return current_intent.multiplier * curr_attack_level
 		EnemyAction.ACTION_TYPE.BLOCK:
 			return current_intent.multiplier * curr_block_level
 		EnemyAction.ACTION_TYPE.HEAL:
 			return current_intent.multiplier * curr_heal_level
 		_:
-			push_error("intent action type not detected for: ", self)
+			push_error("intent action type not detected for: ", self, " actiontype is: ", current_intent.ACTION_TYPE)
 			return -1
-
+	
 func get_current_intent_targets():
 	if current_intent and current_intent.target_type:
 		return GlobalBattle.get_targets_by_target_type(current_intent.target_type, self)
