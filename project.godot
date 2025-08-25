@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 Global="*res://autoload/global.gd"
 GameController="*res://autoload/game_controller.gd"
+GlobalBattle="*res://autoload/global_battle.gd"
 
 [rendering]
 

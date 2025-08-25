@@ -20,6 +20,7 @@ signal player_mana_updated(current_mana: int)
 # Enemy Specific Events
 signal enemy_intent_updated(enemy: Enemy, action: EnemyAction)
 signal enemy_action_executed(enemy: Enemy, action: EnemyAction)
+signal enemy_level_changed(enemy:Enemy)
 
 # Slot Machine Events
 signal slot_roll_completed(symbols: Array[SymbolData])

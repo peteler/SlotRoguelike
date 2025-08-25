@@ -3,14 +3,6 @@
 class_name SymbolData
 extends Resource
 
-enum TARGET_TYPE {
-	PLAYER_CHARACTER, # Applies to the player
-	SINGLE_ENEMY,     # Applies to one enemy
-	ALL_ENEMIES,      # Applies to all enemies
-	RANDOM_ENEMY,     # Applies to a random enemy
-	ALL_CHARACTERS,   # Applies to everyone
-	NONE              # No target (global effects)
-}
 enum APPLY_TIME {
 	FIRST,
 	BY_ORDER,
@@ -43,14 +35,14 @@ enum SPECIAL_EFFECT {
 # target_type[i] = SymbolData.TARGET_TYPE.PLAYER_CHARACTER
 @export var basic_effect_stat_name: Array[String] = []
 @export var basic_effect_stat_change_amount: Array[int] = []
-@export var basic_effect_target_type: Array[TARGET_TYPE] = []
+@export var basic_effect_target_type: Array[GlobalBattle.TARGET_TYPE] = []
 
 @export_group("Special Effects [String, TARGET_TYPE]")
 # String = effect name [Apply Weak, Apply Strength , etc.]
-@export var special_effects: Dictionary[SPECIAL_EFFECT, TARGET_TYPE] = {}
+@export var special_effects: Dictionary[SPECIAL_EFFECT, GlobalBattle.TARGET_TYPE] = {}
 
 @export_group("Custom Effects [GDScript, TARGET_TYPE]")
-@export var custom_effects: Dictionary[GDScript, TARGET_TYPE] = {}
+@export var custom_effects: Dictionary[GDScript, GlobalBattle.TARGET_TYPE] = {}
 
 @export_group("Gameplay flags")
 @export var edition: EDITION = EDITION.NORMAL

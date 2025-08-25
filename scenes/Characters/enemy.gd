@@ -4,16 +4,39 @@ extends Character
 
 ## Enemy configuration and AI state
 @export var enemy_data: EnemyData
-var current_intent: EnemyAction
 var action_cooldowns: Dictionary = {}  # Track cooldowns for each action
 var turns_since_last_special: int = 0
 
 @onready var battle_ui: EnemyBattleUI = $EnemyBattleUI
 
-## These change during combat, EnemyActions use these, NOT WHAT'S ON DISPLAY!!!
-var attack_val: int
-var block_val: int
+# levels determine intent action value
+var curr_attack_level: int
+var curr_block_level: int
+var curr_heal_level: int
+var curr_buff_level: int
 
+# for intent display & basic action execution
+# cannot be move to EnemyAction since it's dependent on enemy_level
+var current_intent: EnemyAction:
+	set(intent):
+		current_intent = intent if intent else null
+		Global.enemy_intent_updated.emit(self, current_intent, curr_action_val, curr_action_targets)
+
+var curr_action_val: int:
+	set(val):
+		if val >=0:
+			curr_action_val = val
+			Global.enemy_intent_updated.emit(self, current_intent, curr_action_val, curr_action_targets)
+		else:
+			current_intent = null
+
+var curr_action_targets: Array:
+	set(arr):
+		if not arr.is_empty():
+			curr_action_targets = arr
+			Global.enemy_intent_updated.emit(self, current_intent, curr_action_val, curr_action_targets)
+		else:
+			current_intent = null
 
 func _ready():
 	print("entered player's ready")
@@ -23,6 +46,9 @@ func _ready():
 		initialize_from_enemy_data(enemy_data)
 	else:
 		push_error("Enemy has no EnemyData assigned!")
+		
+	# connect signals:
+	Global.enemy_level_changed.connect(_on_enemy_level_changed)
 
 func initialize_from_enemy_data(data: EnemyData):
 	"""Initialize enemy specific features from EnemyData resource"""
@@ -32,9 +58,12 @@ func initialize_from_enemy_data(data: EnemyData):
 	## Initialize specific enemy data
 	for action in enemy_data.possible_actions:
 		action_cooldowns[action] = 0
-	# for now init attack, block like this since it's an enemy specific system
-	attack_val = data.base_attack
-	block_val = data.base_block
+	
+	# setup curr values that'll change throughout the encounter due to buffs and such
+	curr_attack_level = data.attack_level
+	curr_block_level = data.block_level
+	curr_heal_level = data.heal_level
+	curr_buff_level = data.buff_level
 
 # --- Turn Management (called by BattleManager) ---
 
@@ -88,9 +117,31 @@ func select_intent():
 		_:
 			current_intent = select_weighted_action(available_actions)
 	
-	#TODO: Show intent to player ---- probably best by adding another ui child element? that's inside enemy_data
+	# update action's value and targets to current intent, setter signals for ui change
+	curr_action_val = get_current_intent_action_value()
+	curr_action_targets = get_current_intent_targets()
 
-	Global.enemy_intent_updated.emit(self, current_intent)
+# on enemy buff/ debuff, i need to change the action value since it's updated
+func _on_enemy_level_changed(enemy: Enemy):
+	if enemy == self:
+		curr_action_val = get_current_intent_action_value()
+
+func get_current_intent_action_value():
+	match current_intent.ACTION_TYPE:
+		EnemyAction.ACTION_TYPE.ATTACK:
+			return current_intent.multiplier * curr_attack_level
+		EnemyAction.ACTION_TYPE.BLOCK:
+			return current_intent.multiplier * curr_block_level
+		EnemyAction.ACTION_TYPE.HEAL:
+			return current_intent.multiplier * curr_heal_level
+		_:
+			push_error("intent action type not detected for: ", self)
+			return -1
+
+func get_current_intent_targets():
+	if current_intent and current_intent.target_type:
+		return GlobalBattle.get_targets_by_target_type(current_intent.target_type, self)
+	return []
 
 func get_available_actions() -> Array[EnemyAction]:
 	"""Get actions that can be used this turn"""
@@ -178,21 +229,25 @@ func execute_current_intent():
 	print(enemy_data.character_name + " uses " + current_intent.action_name)
 	
 	# Add visual delay for better game feel
-	await get_tree().create_timer(0.5).timeout
+	await get_tree().create_timer(0.3).timeout
 	
 	match current_intent.action_type:
-		EnemyAction.ActionType.ATTACK:
-			await execute_basic_attack_action()
-		EnemyAction.ActionType.DEFEND:
-			await execute_basic_defend_action()
-		EnemyAction.ActionType.HEAL:
-			await execute_heal_action()
-		EnemyAction.ActionType.SPECIAL_ABILITY:
-			await execute_special_action()
-		EnemyAction.ActionType.BUFF_SELF:
-			await execute_buff_action()
-		EnemyAction.ActionType.DEBUFF_PLAYER:
-			await execute_debuff_action()
+		EnemyAction.ACTION_TYPE.ATTACK:
+			for target in curr_action_targets:
+				await attack_target(target)
+		EnemyAction.ACTION_TYPE.BLOCK:
+			for target in curr_action_targets:
+				await give_block_to_target(target)
+		EnemyAction.ACTION_TYPE.HEAL:
+			for target in curr_action_targets:
+				await heal_target(target)
+		#TODO:
+		#EnemyAction.ACTION_TYPE.CUSTOM_ABILITY:
+			#await execute_special_action()
+		#EnemyAction.ACTION_TYPE.BUFF:
+			#await execute_buff_action()
+		#EnemyAction.ACTION_TYPE.DEBUFF_PLAYER:
+			#await execute_debuff_action()
 	
 	# Set cooldown
 	if current_intent.cooldown_turns > 0:
@@ -200,40 +255,19 @@ func execute_current_intent():
 	
 	Global.enemy_action_executed.emit(self, current_intent)
 
-func execute_basic_attack_action():
-	"""Deal damage to player"""
-	var player = get_tree().get_first_node_in_group("player_character")
-	if player and attack_val > 0:
-		player.take_basic_attack_damage(attack_val)
+func attack_target(target: Character):
+	"""Deal damage to target"""
+	if target and curr_action_val > 0:
+		target.take_basic_attack_damage(curr_action_val)
 
-func execute_basic_defend_action():
+func give_block_to_target(target: Character):
 	"""Gain block"""
-	if block_val > 0:
-		current_block = block_val
-		await get_tree().create_timer(0.2).timeout
+	target.current_block += curr_action_val
 
-func execute_special_action():
+func heal_target(target: Character):
 	"""Execute custom special ability"""
-	if current_intent.custom_effect_script:
-		var effect_instance = current_intent.custom_effect_script.new()
-		if effect_instance.has_method("execute_effect"):
-			effect_instance.execute_effect(self, current_intent)
-	await get_tree().create_timer(0.4).timeout
-
-func execute_heal_action():
-	pass
-
-func execute_buff_action():
-	"""Apply temporary buff to self"""
-	# TODO: Implement buff system
-	print("Buff action not yet implemented")
-	await get_tree().create_timer(0.2).timeout
-
-func execute_debuff_action():
-	"""Apply debuff to player"""
-	# TODO: Implement debuff system
-	print("Debuff action not yet implemented")
-	await get_tree().create_timer(0.2).timeout
+	if target and curr_action_val > 0:
+		target.current_health += curr_action_val
 
 # --- EnemyBattleUI functions ---
 
@@ -247,7 +281,6 @@ func init_battle_ui(data: EnemyData):
 	
 	# init enemy specific UI
 	init_intent_ui(data)
-
 
 func init_intent_ui(data: EnemyData):
 	"""
@@ -266,7 +299,7 @@ func init_intent_ui(data: EnemyData):
 	
 	# Position the intent display relative to the main character node
 	battle_ui.intent_display.position = anchor_pos + data.intent_ui_offset
-	battle_ui.intent_display.scale = data.intent_ui_scale
+	
 	
 	print("Intent UI positioned at: ", battle_ui.intent_display.position, " (anchor: ", data.intent_ui_anchor, ")")
 

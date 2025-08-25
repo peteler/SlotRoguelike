@@ -10,10 +10,12 @@ size = Vector2(135, 257)
 script = ExtResource("2_mjudt")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(-0.5, -129)
 shape = SubResource("RectangleShape2D_q03n0")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(-0.5, -129)
 
 [node name="PlayerCharacterBattleUI" parent="." instance=ExtResource("2_3hfu2")]
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 40.0
+offset_bottom = 40.0

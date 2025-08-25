@@ -21,7 +21,6 @@ var current_state: State
 var current_targeting_mode := TargetingMode.NONE
 var current_spell: Spell
 
-
 ## UI Node References - now relative to self since BattleManager is root
 @onready var slot_machine_container = $UI/SlotMachineContainer
 @onready var attack_button = $UI/AttackButton
@@ -53,9 +52,7 @@ var enemies: Array
 
 func _ready():
 	# Add to group for GameController to find
-	print("battle_manager.ready called")
 	add_to_group("battle_manager")
-	print("add_to_group called")
 	# initialization is called from gamecontroller
 
 # called once by GameController to initialize a battle encounter
@@ -107,12 +104,12 @@ func spawn_player_character(player_data: PlayerData):
 	player_character.player_data = player_data
 	
 	# Position at spawn point
+	var spawn_offset = player_data.class_data.spawn_offset
 	if player_spawn:
-		player_character.global_position = player_spawn.global_position
+		player_character.global_position = player_spawn.global_position + spawn_offset
 	
 	# Add to scene
 	characters_node.add_child(player_character)
-	print("Player character spawned")
 
 func create_slot_machine(player_data: PlayerData):
 	"""Create slot machine based on provided player data"""
@@ -186,7 +183,6 @@ func _on_slot_roll_completed(symbols: Array[SymbolData]):
 
 	# The SlotMachine now handles all symbol processing via SymbolProcessor
 	# We just need to wait for it to complete and move to the next state
-	print("Roll received: ", symbols)
 	
 	# Move to player action state - symbol effects have already been applied
 	enter_state(State.PLAYER_ACTION)
@@ -403,9 +399,7 @@ func execute_enemy_turns():
 	"""
 
 	for enemy in turn_order:
-		print("inside execute_enemy_turns loop")
 		if enemy.is_alive():
-			print("inside execute_enemy_turns loop, enemy is alive")
 			await enemy.start_turn()
 	
 	Global.all_enemy_turns_completed.emit()

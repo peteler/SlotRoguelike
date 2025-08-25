@@ -10,21 +10,28 @@ extends Resource
 @export var start_of_encounter_block: int = 0
 
 ## UI Placement Configuration
-@export_group("UI Placement")
+@export_group("UI settings")
 # Collision shape configuration
+@export_group("CollisionShape settings")
 @export var custom_collision_shape: Shape2D  # Override default collision shape
 @export var collision_offset: Vector2 = Vector2.ZERO  # Offset from sprite center
 @export var collision_scale: Vector2 = Vector2.ONE
 @export var auto_fit_collision: bool = true  # Auto-size collision to sprite bounds
 
 # battle UI positioning
-@export var battle_ui_offset: Vector2 = Vector2(0, -50)  # Relative to sprite center
+@export_group("Battle_UI Placement")
+@export var battle_ui_offset: Vector2 = Vector2.ZERO  # Relative to sprite center
 @export var battle_ui_anchor: String = "top_center"  # Where to anchor the UI
 @export var battle_ui_scale: Vector2 = Vector2.ONE
 
 # Individual component offsets (relative to battle_ui)
 @export var health_bar_local_offset: Vector2 = Vector2.ZERO 
 @export var block_display_local_offset: Vector2 = Vector2(0, 50)
+
+@export_group("Spawn Settings")
+@export var spawn_offset: Vector2 = Vector2.ZERO
+
+
 
 
 ## helper functions for placement

@@ -22,7 +22,7 @@ func _ready():
 	if not enemy:
 		push_error("EnemyBattleUI must be a direct child of an Enemy node.")
 
-func _on_enemy_intent_updated(updated_character: Enemy, intent: EnemyAction):
+func _on_enemy_intent_updated(updated_character: Enemy, intent: EnemyAction, action_val: int):
 	# Only update if this is our character
 	if updated_character == enemy and intent:
 		# Update the icon and text based on the new intent.
@@ -32,10 +32,11 @@ func _on_enemy_intent_updated(updated_character: Enemy, intent: EnemyAction):
 			# You might want a default "question mark" icon here
 			intent_icon.texture = null 
 
-		intent_label.text = intent.get_intent_description()
+		intent_label.text = str(action_val)
 		
 		# Make the whole display visible.
 		intent_display.visible = true
+	
 	elif updated_character == enemy:
-		# Hide if the intent is cleared (after action execution)
+		# Hide if the intent is cleared (e.g: after action execution)
 		intent_display.visible = false

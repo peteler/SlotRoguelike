@@ -3,9 +3,11 @@
 class_name EnemyData
 extends CharacterData
 
-## base enemy stats (used only by enemy for action system)
-@export var base_attack: int = 5
-@export var base_block: int = 2
+## stat levels, affect actions of same type
+@export var attack_level: int = 5
+@export var block_level: int = 2
+@export var heal_level: int = 0
+@export var buff_level: int = 0
 
 ## AI Behavior Configuration
 @export_group("AI Behavior")
@@ -18,13 +20,12 @@ extends CharacterData
 @export var possible_actions: Array[EnemyAction] = []
 @export var action_weights: Array[int] = []  # Relative weights for action selection
 
-## Reward drops
-@export_group("Rewards")
-@export var symbol_rewards: Array[SymbolData] = []  # Symbols player can gain
-@export var reward_count: int = 1  # How many symbols to give
-
 ## Enemy Intent UI placement
 @export_group("Intent UI Placement")
 @export var intent_ui_offset: Vector2 = Vector2(0, -100)  # Relative to sprite center
 @export var intent_ui_anchor: String = "top_center"  # Where to anchor the UI
-@export var intent_ui_scale: Vector2 = Vector2.ONE
+
+## Reward drops
+@export_group("Rewards")
+@export var symbol_rewards: Array[SymbolData] = []  # Symbols player can gain
+@export var reward_count: int = 1  # How many symbols to give

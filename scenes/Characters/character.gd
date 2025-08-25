@@ -6,7 +6,6 @@ var max_health: int:
 	set(value):
 		max_health = clampi(value, 1, 999)
 		current_health = clampi(current_health, 0, max_health)
-		print("current health, max health for ", self, " is: ", current_health, max_health)
 		Global.character_health_updated.emit(self, current_health, max_health)
 		if not is_alive():
 			Global.character_died.emit(self)
@@ -14,7 +13,6 @@ var max_health: int:
 var current_health: int:
 	set(value):
 		current_health = clampi(value, 0, max_health)
-		print("current health, max health for ", self, " is: ", current_health, max_health)
 		Global.character_health_updated.emit(self, current_health, max_health)
 		if not is_alive():
 			Global.character_died.emit(self)
@@ -52,6 +50,7 @@ func init_character_battle_ui(character_data: CharacterData, battle_ui: Characte
 	if sprite and character_data.sprite:
 		sprite.texture = character_data.sprite
 	
+	
 	if not character_data or not sprite:
 		push_error("Missing CharacterData or Sprite2D for UI placement!")
 		return
@@ -60,16 +59,9 @@ func init_character_battle_ui(character_data: CharacterData, battle_ui: Characte
 	var sprite_rect = sprite.get_rect()
 	var sprite_size = sprite_rect.size
 	
-	print("Applying UI placement for ", character_data.character_name, " - Sprite size: ", sprite_size)
-	
 	# Apply CollisionShape configuration
 	if collision_shape:
-		# Use a manually defined collision shape from the resource.
-		collision_shape.shape = character_data.custom_collision_shape
-		collision_shape.scale = character_data.collision_scale
-		
-		# Set the collision shape's position relative to the sprite.
-		collision_shape.position = sprite.position + character_data.collision_offset
+		setup_collision_shape(character_data, sprite_rect)
 
 	# Apply Stats UI placement
 	if battle_ui:
@@ -85,6 +77,8 @@ func init_character_battle_ui(character_data: CharacterData, battle_ui: Characte
 	
 	# Setup individual UI components within battleUI
 	setup_battle_ui_components(character_data, battle_ui)
+
+# --- ui initialization helpers ---
 
 func setup_battle_ui_components(character_data: CharacterData, battle_ui: CharacterBattleUI):
 	"""Position individual components within the battleUI"""
@@ -102,6 +96,49 @@ func setup_battle_ui_components(character_data: CharacterData, battle_ui: Charac
 		block_display.position = character_data.block_display_local_offset
 	
 	print("Configured UI components with local offsets")
+
+func setup_collision_shape(character_data: CharacterData, sprite_rect: Rect2):
+	"""Setup collision shape based on character data"""
+	if character_data.auto_fit_collision:
+		# Auto-create a collision shape based on sprite
+		create_collision_from_sprite(sprite, character_data)
+	elif character_data.custom_collision_shape:
+		# Use the custom collision shape from the resource
+		collision_shape.shape = character_data.custom_collision_shape
+		collision_shape.scale = character_data.collision_scale
+		collision_shape.position = sprite.position + character_data.collision_offset
+	else:
+		# Fallback: create a default collision shape
+		create_default_collision(sprite, character_data)
+
+func create_collision_from_sprite(sprite_node: Sprite2D, character_data: CharacterData):
+	"""Create a collision shape that matches the sprite"""
+	var rectangle_shape = RectangleShape2D.new()
+	
+	# Get the sprite's texture size
+	var texture_size = sprite_node.texture.get_size()
+	
+	# Account for sprite scale
+	var scaled_size = texture_size * sprite_node.scale
+	
+	# Set the rectangle size to match the sprite
+	rectangle_shape.size = scaled_size
+	
+	# Assign the shape to the collision shape
+	collision_shape.shape = rectangle_shape
+	
+	# Position the collision shape to match the sprite's position with offset
+	collision_shape.position = sprite_node.position + character_data.collision_offset
+	collision_shape.scale = character_data.collision_scale
+
+func create_default_collision(sprite_node: Sprite2D, character_data: CharacterData):
+	"""Create a default collision shape as fallback"""
+	var rectangle_shape = RectangleShape2D.new()
+	rectangle_shape.size = Vector2(32, 32)	 # Default size
+	
+	collision_shape.shape = rectangle_shape
+	collision_shape.position = sprite_node.position + character_data.collision_offset
+	collision_shape.scale = character_data.collision_scale
 
 # --- Core Combat Functions ---
 func take_basic_attack_damage(amount: int):

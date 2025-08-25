@@ -32,7 +32,7 @@ func apply_symbol_effects(symbol: SymbolData):
 		var stat_change_amount = symbol.basic_effect_stat_change_amount[i]
 		var target_type = symbol.basic_effect_target_type[i]
 		
-		var targets = get_targets_by_target_type(target_type) # Array[Character]
+		var targets = Global.get_targets_by_target_type(target_type) # Array[Character]
 	
 		for target in targets:
 			target.modify_property_by_amount(stat_name, stat_change_amount)
@@ -44,7 +44,7 @@ func apply_symbol_effects(symbol: SymbolData):
 	for effect in symbol.special_effects:
 		var target_type = symbol.special_effects[effect]
 		
-		var targets = get_targets_by_target_type(target_type)
+		var targets = Global.get_targets_by_target_type(target_type)
 		
 		for target in targets:
 			apply_special_effect_to_target(effect, target)
@@ -56,7 +56,7 @@ func apply_symbol_effects(symbol: SymbolData):
 	for effect in symbol.custom_effects:
 		var target_type = symbol.custom_effects[effect]
 		
-		var targets = get_targets_by_target_type(target_type)
+		var targets = Global.get_targets_by_target_type(target_type)
 		
 		if targets.is_empty():
 			apply_custom_effect(effect)
@@ -81,45 +81,6 @@ func apply_custom_effect_to_target(effect: GDScript, target: Character):
 	pass
 
 # Utility functions
-func get_targets_by_target_type(target_type: SymbolData.TARGET_TYPE) -> Array:
-	"""Determine targets for a symbol based on its target type"""
-	match target_type:
-		SymbolData.TARGET_TYPE.PLAYER_CHARACTER:
-			var player = get_tree().get_first_node_in_group("player_character")
-			return [player] if player else []
-		
-		SymbolData.TARGET_TYPE.SINGLE_ENEMY:
-			var enemies = get_tree().get_nodes_in_group("enemies")
-			var alive_enemies = enemies.filter(func(e): return e.is_alive())
-			return [alive_enemies[0]] if not alive_enemies.is_empty() else []
-		
-		SymbolData.TARGET_TYPE.ALL_ENEMIES:
-			var enemies = get_tree().get_nodes_in_group("enemies")
-			return enemies.filter(func(e): return e.is_alive())
-		
-		SymbolData.TARGET_TYPE.RANDOM_ENEMY:
-			var enemies = get_tree().get_nodes_in_group("enemies")
-			var alive_enemies = enemies.filter(func(e): return e.is_alive())
-			if alive_enemies.is_empty():
-				return []
-			return [alive_enemies[randi() % alive_enemies.size()]]
-		
-		SymbolData.TARGET_TYPE.ALL_CHARACTERS:
-			var all_chars: Array[Character] = []
-			var player = get_tree().get_first_node_in_group("player_character")
-			if player:
-				all_chars.append(player)
-			
-			var enemies = get_tree().get_nodes_in_group("enemies")
-			all_chars.append_array(enemies.filter(func(e): return e.is_alive()))
-			return all_chars
-		
-		SymbolData.TARGET_TYPE.NONE:
-		# Global effects that don't target specific characters
-			return []
-		
-		_:
-			return []
 
 func play_visual_effect(symbol: SymbolData):
 	"""Play visual effect for symbol"""
