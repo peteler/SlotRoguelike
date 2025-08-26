@@ -1,8 +1,8 @@
 # PlayerClassData.gd - Static, unchanging player class definition
 # A factory for creating a fresh "character sheet" [player_data] at the start of a run.
 @tool
-class_name PlayerClassData
-extends CharacterData
+class_name PlayerClassTemplate
+extends CharacterTemplate
 
 ## Starting Resources
 @export_group("Starting Resources & Stats")

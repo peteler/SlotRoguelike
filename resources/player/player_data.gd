@@ -4,7 +4,7 @@ class_name PlayerData
 extends Resource
 
 ## Core Identity
-@export var class_data: PlayerClassData  # Reference to the class this character is
+@export var class_data: PlayerClassTemplate  # Reference to the class this character is
 var character_name = class_data.character_name if class_data else "no_name"
 
 ## turn Stats (these reset each turn)

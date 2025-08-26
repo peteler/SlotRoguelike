@@ -3,7 +3,7 @@ class_name Enemy
 extends Character
 
 ## Enemy configuration and AI state
-@export var enemy_data: EnemyData
+@export var enemy_data: EnemyTemplate
 var action_cooldowns: Dictionary = {}  # Track cooldowns for each action
 var turns_since_last_special: int = 0
 
@@ -23,27 +23,25 @@ func _ready():
 	super._ready()  # Call Character._ready()
 	
 	if enemy_data:
-		initialize_from_enemy_data(enemy_data)
+		initialize_from_enemy_template(enemy_data)
 	else:
 		push_error("Enemy has no EnemyData assigned!")
-		
-	# connect signals:
-	Global.enemy_level_changed.connect(_on_enemy_level_changed)
 
-func initialize_from_enemy_data(data: EnemyData):
+func initialize_from_enemy_template(template: EnemyTemplate):
 	"""Initialize enemy specific features from EnemyData resource"""
 	
-	init_battle_ui(data)
+	init_battle_ui(template)
 	
-	## Initialize specific enemy data
+	#TODO: BattleNPC class inheritence! Initialize specific enemy data
 	for action in enemy_data.possible_actions:
 		action_cooldowns[action] = 0
 	
+	#TODO: LEVELCOMPONENT!
 	# setup curr values that'll change throughout the encounter due to buffs and such
-	curr_attack_level = data.attack_level
-	curr_block_level = data.block_level
-	curr_heal_level = data.heal_level
-	curr_buff_level = data.buff_level
+	curr_attack_level = template.attack_level
+	curr_block_level = template.block_level
+	curr_heal_level = template.heal_level
+	curr_buff_level = template.buff_level
 
 # --- Turn Management (called by BattleManager) ---
 
@@ -74,32 +72,25 @@ func finish_turn():
 func call_on_start_of_player_turn():
 	intent_component.select_intent()
 
-# on enemy buff/ debuff, i need to change the action value since it's updated
-
-# ---------------------------------
-
-# --- Action Execution ---
-
-
 # --- EnemyBattleUI functions ---
-
-func init_battle_ui(data: EnemyData):
+##TODO: move these into battlenpc class
+func init_battle_ui(template: EnemyTemplate):
 	if not battle_ui:
 		push_error("battle_ui not available when needed for enemy: ", self)
 		
 	# init base character data, stats, ui, etc.
-	init_character_battle_stats(data) # only sets up health,max health for now
-	init_character_battle_ui(data, battle_ui)
+	init_character_battle_stats(template) # only sets up health,max health for now
+	init_character_battle_ui(template, battle_ui)
 	
 	# init enemy specific UI
-	init_intent_ui(data)
+	init_intent_ui(template)
 
-func init_intent_ui(data: EnemyData):
+func init_intent_ui(template: EnemyTemplate):
 	"""
 	Applies UI placement configuration from EnemyData.
 	Called once from init_battle_ui.
 	"""
-	if not data or not sprite or not battle_ui.intent_display:
+	if not template or not sprite or not battle_ui.intent_display:
 		push_error("Missing EnemyData, Sprite2D, or IntentDisplay for UI placement!")
 		return
 	
@@ -107,13 +98,12 @@ func init_intent_ui(data: EnemyData):
 	var sprite_rect = sprite.get_rect()
 	
 	# Get the anchor position relative to the sprite's local coordinates.
-	var anchor_pos = data.get_anchor_position(data.intent_ui_anchor, sprite_rect)
+	var anchor_pos = template.get_anchor_position(template.intent_ui_anchor, sprite_rect)
 	
 	# Position the intent display relative to the main character node
-	battle_ui.intent_display.position = anchor_pos + data.intent_ui_offset
+	battle_ui.intent_display.position = anchor_pos + template.intent_ui_offset
 	
-	
-	print("Intent UI positioned at: ", battle_ui.intent_display.position, " (anchor: ", data.intent_ui_anchor, ")")
+	print("Intent UI positioned at: ", battle_ui.intent_display.position, " (anchor: ", template.intent_ui_anchor, ")")
 
 # --- Helper Functions ---
 

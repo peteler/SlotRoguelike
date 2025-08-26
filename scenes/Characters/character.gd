@@ -30,54 +30,54 @@ func _ready():
 	# already connected to player_characteR?
 	self.input_event.connect(_on_input_event)
 
-# --- Stats & UI initialization from character_data ---
+# --- Stats & UI initialization from character_template ---
 
 ## CALLED ONCE by specific characters for ui setup
-## INPUT: data is character_data OR player_data
-## [difference is character_data is a static resource and player_data is dynamic save data]
+## INPUT: data is character_template OR player_data
+## [difference is character_template is a static resource and player_data is dynamic save data]
 func init_character_battle_stats(data):
-	## init PlayerData & CharacterData mutual stats
+	## init PlayerData & CharacterTemplate mutual stats
 	max_health = data.max_health
 	current_health = max_health
 	current_block = data.start_of_encounter_block
 
-func init_character_battle_ui(character_data: CharacterData, battle_ui: CharacterBattleUI):
+func init_character_battle_ui(character_template: CharacterTemplate, battle_ui: CharacterBattleUI):
 	"""
-	Applies UI placement configuration from CharacterData.
+	Applies UI placement configuration from CharacterTemplate.
 	Called once by the spceific character.
 	"""
 	
-	if sprite and character_data.sprite:
-		sprite.texture = character_data.sprite
+	if sprite and character_template.sprite:
+		sprite.texture = character_template.sprite
 	
-	if not character_data or not sprite:
-		push_error("Missing CharacterData or Sprite2D for UI placement!")
+	if not character_template or not sprite:
+		push_error("Missing CharacterTemplate or Sprite2D for UI placement!")
 		return
 	
 	# Apply CollisionShape configuration
 	if collision_shape:
-		setup_collision_shape(character_data)
+		setup_collision_shape(character_template)
 		
 	# Get the sprite's bounding box in its local coordinate system.
 	var sprite_rect = sprite.get_rect()
 	# Apply Stats UI placement
 	if battle_ui:
 		# Get the anchor position relative to the sprite's local coordinates.
-		var anchor_pos = character_data.get_anchor_position(character_data.battle_ui_anchor, sprite_rect)
+		var anchor_pos = character_template.get_anchor_position(character_template.battle_ui_anchor, sprite_rect)
 		
 		# The battle UI is a child of the character node, so its position is relative to the character.
 		# This positioning is correct for a UI node placed as a sibling to the Sprite2D.
-		battle_ui.position = anchor_pos + character_data.battle_ui_offset
-		battle_ui.scale = character_data.battle_ui_scale
+		battle_ui.position = anchor_pos + character_template.battle_ui_offset
+		battle_ui.scale = character_template.battle_ui_scale
 		
-		print("battle UI positioned at: ", battle_ui.position, " (anchor: ", character_data.battle_ui_anchor, ")")
+		print("battle UI positioned at: ", battle_ui.position, " (anchor: ", character_template.battle_ui_anchor, ")")
 	
 	# Setup individual UI components within battleUI
-	setup_battle_ui_components(character_data, battle_ui)
+	setup_battle_ui_components(character_template, battle_ui)
 
 # --- ui initialization helpers ---
 
-func setup_battle_ui_components(character_data: CharacterData, battle_ui: CharacterBattleUI):
+func setup_battle_ui_components(character_template: CharacterTemplate, battle_ui: CharacterBattleUI):
 	"""Position individual components within the battleUI"""
 	if not battle_ui:
 		return
@@ -85,30 +85,30 @@ func setup_battle_ui_components(character_data: CharacterData, battle_ui: Charac
 	# Find health bar component
 	var health_bar = battle_ui.get_node_or_null("HealthBar")
 	if health_bar:
-		health_bar.position = character_data.health_bar_local_offset
+		health_bar.position = character_template.health_bar_local_offset
 
 	# Find block display component
 	var block_display = battle_ui.get_node_or_null("BlockDisplay")
 	if block_display:
-		block_display.position = character_data.block_display_local_offset
+		block_display.position = character_template.block_display_local_offset
 	
 	print("Configured UI components with local offsets")
 
-func setup_collision_shape(character_data: CharacterData):
+func setup_collision_shape(character_template: CharacterTemplate):
 	"""Setup collision shape based on character data"""
-	if character_data.auto_fit_collision:
+	if character_template.auto_fit_collision:
 		# Auto-create a collision shape based on sprite
-		create_collision_from_sprite(sprite, character_data)
-	elif character_data.custom_collision_shape:
+		create_collision_from_sprite(sprite, character_template)
+	elif character_template.custom_collision_shape:
 		# Use the custom collision shape from the resource
-		collision_shape.shape = character_data.custom_collision_shape
-		collision_shape.scale = character_data.collision_scale
-		collision_shape.position = sprite.position + character_data.collision_offset
+		collision_shape.shape = character_template.custom_collision_shape
+		collision_shape.scale = character_template.collision_scale
+		collision_shape.position = sprite.position + character_template.collision_offset
 	else:
 		# Fallback: create a default collision shape
-		create_default_collision(sprite, character_data)
+		create_default_collision(sprite, character_template)
 
-func create_collision_from_sprite(sprite_node: Sprite2D, character_data: CharacterData):
+func create_collision_from_sprite(sprite_node: Sprite2D, character_template: CharacterTemplate):
 	"""Create a collision shape that matches the sprite"""
 	var rectangle_shape = RectangleShape2D.new()
 	
@@ -125,17 +125,17 @@ func create_collision_from_sprite(sprite_node: Sprite2D, character_data: Charact
 	collision_shape.shape = rectangle_shape
 	
 	# Position the collision shape to match the sprite's position with offset
-	collision_shape.position = sprite_node.position + character_data.collision_offset
-	collision_shape.scale = character_data.collision_scale
+	collision_shape.position = sprite_node.position + character_template.collision_offset
+	collision_shape.scale = character_template.collision_scale
 
-func create_default_collision(sprite_node: Sprite2D, character_data: CharacterData):
+func create_default_collision(sprite_node: Sprite2D, character_template: CharacterTemplate):
 	"""Create a default collision shape as fallback"""
 	var rectangle_shape = RectangleShape2D.new()
 	rectangle_shape.size = Vector2(32, 32)	 # Default size
 	
 	collision_shape.shape = rectangle_shape
-	collision_shape.position = sprite_node.position + character_data.collision_offset
-	collision_shape.scale = character_data.collision_scale
+	collision_shape.position = sprite_node.position + character_template.collision_offset
+	collision_shape.scale = character_template.collision_scale
 
 # --- Core Combat Functions ---
 func take_basic_attack_damage(amount: int):

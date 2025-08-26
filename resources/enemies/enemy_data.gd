@@ -1,7 +1,7 @@
 # EnemyData.gd - A resource for defining enemy-specific data
 @tool
-class_name EnemyData
-extends CharacterData
+class_name EnemyTemplate
+extends CharacterTemplate
 
 ## stat levels, affect actions of same type
 @export var attack_level: int = 1

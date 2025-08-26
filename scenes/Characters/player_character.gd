@@ -46,7 +46,7 @@ func initialize_from_player_data():
 	"""Initialize player character from PlayerData resource"""
 	# init base character stats
 	init_character_battle_stats(player_data)
-	# init battle_ui based on CharacterData
+	# init battle_ui based on CharacterTemplate
 	init_character_battle_ui(player_data.class_data, battle_ui)
 	
 	# initialize player-specific battle ui

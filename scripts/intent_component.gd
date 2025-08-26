@@ -134,6 +134,7 @@ func get_current_intent_data() -> Dictionary:
 		"targets": current_targets
 	}
 
+
 # --- action execution functions ---
 func execute_current_intent():
 	"""Execute the selected action"""
@@ -175,7 +176,6 @@ func heal_target(target: Character):
 	"""Execute custom special ability"""
 	if target and current_action_val > 0:
 		target.current_health += current_action_val
-
 
 func update_current_intent():
 	"""Recalculate action value & targets** (called when character stats change)"""

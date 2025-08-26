@@ -1,6 +1,6 @@
-# CharacterData.gd - Resource that all spawnable entities should inherit from
+# CharacterTemplate.gd - Resource that all spawnable entities should inherit from
 @tool
-class_name CharacterData
+class_name CharacterTemplate
 extends Resource
 
 ## Basic character information
