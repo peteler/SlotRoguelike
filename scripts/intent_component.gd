@@ -74,28 +74,30 @@ func calculate_current_intent_action_value() -> int:
 
 func get_current_intent_targets():
 	if current_intent and current_intent.target_type:
-		return GlobalBattle.get_targets_by_target_type(current_intent.target_type, self)
+		return GlobalBattle.get_targets_by_target_type(current_intent.target_type, owner_character)
 	return []
 
 func get_available_actions() -> Array[Action]:
 	"""Get actions that can be used this turn"""
-	if not possible_actions:
+	if not possible_actions or possible_actions.is_empty():
 		push_error("no possible_actions for: ", owner_character)
-		return
+		return []
 	
 	var available: Array[Action] = []
-	var health_percent = float(current_health) / float(max_health)
 	
-	for action in enemy_data.possible_actions:
+	for action in possible_actions:
 		# Check cooldown
 		if action_cooldowns.get(action, 0) > 0:
 			continue
 		
-		# Check health requirements
-		if health_percent < action.min_health_percent:
-			continue
-		if health_percent > action.max_health_percent:
-			continue
+		#TODO: implement character_stats component? or just implement .get_curr_health_ratio()
+		#var health_percent = character_stats.get("current_health") / character_stats.get("max_health")
+		#
+		## Check health requirements
+		#if health_percent < action.min_health_percent:
+			#continue
+		#if health_percent > action.max_health_percent:
+			#continue
 		
 		available.append(action)
 	
@@ -131,6 +133,48 @@ func get_current_intent_data() -> Dictionary:
 		"action_val": current_action_val,
 		"targets": current_targets
 	}
+
+# --- action execution functions ---
+func execute_current_intent():
+	"""Execute the selected action"""
+	if not current_intent:
+		push_error("No intent selected for enemy turn!")
+		return
+	
+	print(owner_character.character_name + " uses " + current_intent.action_name)
+	
+	# Add visual delay for better game feel
+	await get_tree().create_timer(0.3).timeout
+	
+	match current_intent.action_type:
+		Action.ACTION_TYPE.ATTACK:
+			for target in current_targets:
+				await attack_target(target)
+		Action.ACTION_TYPE.BLOCK:
+			for target in current_targets:
+				await give_block_to_target(target)
+		Action.ACTION_TYPE.HEAL:
+			for target in current_targets:
+				await heal_target(target)
+	# Set cooldown
+	if current_intent.cooldown_turns > 0:
+		action_cooldowns[current_intent] = current_intent.cooldown_turns
+	
+	Global.enemy_action_executed.emit(self, current_intent)
+
+func attack_target(target: Character):
+	"""Deal damage to target"""
+	if target and current_action_val > 0:
+		target.take_basic_attack_damage(current_action_val)
+
+func give_block_to_target(target: Character):
+	"""Gain block"""
+	target.current_block += current_action_val
+
+func heal_target(target: Character):
+	"""Execute custom special ability"""
+	if target and current_action_val > 0:
+		target.current_health += current_action_val
 
 
 func update_current_intent():

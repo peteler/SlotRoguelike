@@ -55,7 +55,7 @@ func play_turn():
 	
 	# AI execution
 	
-	await execute_current_intent()
+	await intent_component.execute_current_intent()
 	
 	# Clean up turn state
 	finish_turn()
@@ -79,48 +79,6 @@ func call_on_start_of_player_turn():
 # ---------------------------------
 
 # --- Action Execution ---
-
-func execute_current_intent():
-	"""Execute the selected action"""
-	if not current_intent:
-		push_error("No intent selected for enemy turn!")
-		return
-	
-	print(enemy_data.character_name + " uses " + current_intent.action_name)
-	
-	# Add visual delay for better game feel
-	await get_tree().create_timer(0.3).timeout
-	
-	match current_intent.action_type:
-		Action.ACTION_TYPE.ATTACK:
-			for target in curr_action_targets:
-				await attack_target(target)
-		Action.ACTION_TYPE.BLOCK:
-			for target in curr_action_targets:
-				await give_block_to_target(target)
-		Action.ACTION_TYPE.HEAL:
-			for target in curr_action_targets:
-				await heal_target(target)
-	# Set cooldown
-	if current_intent.cooldown_turns > 0:
-		action_cooldowns[current_intent] = current_intent.cooldown_turns
-	
-	Global.enemy_action_executed.emit(self, current_intent)
-
-func attack_target(target: Character):
-	"""Deal damage to target"""
-	if target and curr_action_val > 0:
-		target.take_basic_attack_damage(curr_action_val)
-
-func give_block_to_target(target: Character):
-	"""Gain block"""
-	target.current_block += curr_action_val
-
-func heal_target(target: Character):
-	"""Execute custom special ability"""
-	if target and curr_action_val > 0:
-		target.current_health += curr_action_val
-
 
 
 # --- EnemyBattleUI functions ---
