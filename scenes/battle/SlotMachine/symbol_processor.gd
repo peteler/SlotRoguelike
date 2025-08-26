@@ -25,46 +25,9 @@ func process_symbols_in_sequence(symbols: Array[SymbolData], delay_between: floa
 
 func apply_symbol_effects(symbol: SymbolData):
 	
-	# handle basic effects
-	for i in range(symbol.basic_effect_stat_name.size()):
-		
-		var stat_name = symbol.basic_effect_stat_name[i]
-		var stat_change_amount = symbol.basic_effect_stat_change_amount[i]
-		var target_type = symbol.basic_effect_target_type[i]
-		
-		var targets = GlobalBattle.get_targets_by_target_type(target_type, null) # Array[Character]
-	
-		for target in targets:
-			target.modify_property_by_amount(stat_name, stat_change_amount)
-			# for vfx
-			Global.symbol_effect_applied.emit(symbol, target)
-
-	
-	# handle special effects
-	for effect in symbol.special_effects:
-		var target_type = symbol.special_effects[effect]
-		
-		var targets = Global.get_targets_by_target_type(target_type)
-		
-		for target in targets:
-			apply_special_effect_to_target(effect, target)
-			# for vfx
-			Global.symbol_effect_applied.emit(symbol, target)
-
-			
-	# handle custom effects
-	for effect in symbol.custom_effects:
-		var target_type = symbol.custom_effects[effect]
-		
-		var targets = Global.get_targets_by_target_type(target_type)
-		
-		if targets.is_empty():
-			apply_custom_effect(effect)
-		else:
-			for target in targets:
-				apply_custom_effect_to_target(effect, target)
-				# for vfx
-				Global.symbol_effect_applied.emit(symbol, target)
+	for effect in symbol.effect_array:
+		effect.apply()
+	#TODO: add signal for vfx?
 
 #TODO:
 func apply_special_effect_to_target(effect: SymbolData.SPECIAL_EFFECT, target: Character):

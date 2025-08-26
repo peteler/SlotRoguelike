@@ -62,5 +62,5 @@ func gain_gold(amount: int):
 func get_save_data():
 	pass
 
-func load_save_data(data: Dictionary):
+func load_save_data():
 	pass

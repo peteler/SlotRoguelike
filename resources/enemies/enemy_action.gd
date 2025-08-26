@@ -1,6 +1,6 @@
-# EnemyAction.gd - Resource for individual enemy actions
+# Action.gd - Resource for individual enemy actions
 @tool
-class_name EnemyAction
+class_name Action
 extends Resource
 
 enum ACTION_TYPE {

@@ -9,15 +9,16 @@ extends CharacterData
 @export var heal_level: int = 0
 @export var buff_level: int = 0
 
+#TODO: rework enemy AI:
 ## AI Behavior Configuration
-@export_group("AI Behavior")
-@export var ai_type: String = "aggressive"  # aggressive, defensive, random, custom
-@export var attack_frequency: float = 0.8  # Chance to attack vs other actions
-@export var special_ability_cooldown: int = 3  # Turns between special abilities
+#@export_group("AI Behavior")
+#@export var ai_type: String = "aggressive"  # aggressive, defensive, random, custom
+#@export var attack_frequency: float = 0.8  # Chance to attack vs other actions
+#@export var special_ability_cooldown: int = 3  # Turns between special abilities
 
 ## Intent System (what the enemy plans to do)
-@export_group("Enemy Actions")
-@export var possible_actions: Array[EnemyAction] = []
+@export_group("Enemy Actions [MUST BE SAME SIZE]")
+@export var possible_actions: Array[Action] = []
 @export var action_weights: Array[int] = []  # Relative weights for action selection
 
 ## Enemy Intent UI placement

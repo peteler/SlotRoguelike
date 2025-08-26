@@ -1,5 +1,6 @@
 # Global.gd - Centralized Event Bus
 extends Node
+@warning_ignore("unused_signal")
 
 # Battle Flow Events
 signal battle_state_changed(new_state: String)

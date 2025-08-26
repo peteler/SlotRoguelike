@@ -11,8 +11,8 @@
 script = ExtResource("3_hmm64")
 attack_level = 5
 block_level = 2
-heal_level = null
-buff_level = null
+heal_level = 0
+buff_level = 0
 ai_type = "aggressive"
 attack_frequency = 0.8
 special_ability_cooldown = 3
@@ -34,5 +34,5 @@ battle_ui_anchor = "top_center"
 battle_ui_scale = Vector2(1, 1)
 health_bar_local_offset = Vector2(0, 210)
 block_display_local_offset = Vector2(40, -120)
-spawn_offset = null
+spawn_offset = Vector2(0, 0)
 metadata/_custom_type_script = "uid://d2qm6v54ljiyl"

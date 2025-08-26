@@ -28,3 +28,17 @@ block + attack scaling: [survive turns through high defense, all the while scali
 	- instead of attacking, double attack for next turn [cant double twice]
 	
 block + poison: [play the long game, survive via block while poison does damage every turn]
+
+
+
+
+
+first encounter:
+- shouldn't lose more than 5 hp ever
+- shouldn't take more than 4 turns ever (usually 2-3)
+- should use 1 spell
+
+howto: 
+- average block should be at most 1 less average enemy attk
+- enemy hp should be the average attack times 2.5
+- enemy should have 1 strong turn - second or third turn maybe

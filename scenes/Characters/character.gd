@@ -54,14 +54,12 @@ func init_character_battle_ui(character_data: CharacterData, battle_ui: Characte
 		push_error("Missing CharacterData or Sprite2D for UI placement!")
 		return
 	
-	# Get the sprite's bounding box in its local coordinate system.
-	var sprite_rect = sprite.get_rect()
-	var sprite_size = sprite_rect.size
-	
 	# Apply CollisionShape configuration
 	if collision_shape:
-		setup_collision_shape(character_data, sprite_rect)
-
+		setup_collision_shape(character_data)
+		
+	# Get the sprite's bounding box in its local coordinate system.
+	var sprite_rect = sprite.get_rect()
 	# Apply Stats UI placement
 	if battle_ui:
 		# Get the anchor position relative to the sprite's local coordinates.
@@ -96,7 +94,7 @@ func setup_battle_ui_components(character_data: CharacterData, battle_ui: Charac
 	
 	print("Configured UI components with local offsets")
 
-func setup_collision_shape(character_data: CharacterData, sprite_rect: Rect2):
+func setup_collision_shape(character_data: CharacterData):
 	"""Setup collision shape based on character data"""
 	if character_data.auto_fit_collision:
 		# Auto-create a collision shape based on sprite
@@ -156,16 +154,16 @@ func _on_input_event(_viewport, event, _shape_idx):
 		# Let any listener (like the BattleManager) know this character was clicked.
 		Global.character_targeted.emit(self)
 
-# --- Symbol Processor Functions ---
-## ONLY USED BY SYMBOL PROCESSOR !
+# --- Functions Used by Other classes ---
+## ONLY USED BY EFFECT.APPLY !
 func modify_property_by_amount(property_name: String, amount: int):
 	if property_name in self:
 		set(property_name, get(property_name) + amount)
 	else:
 		push_error("Property '", property_name, "' does not exist on this object.")
 
-# --- Battle States Helpers ---
 ## @override
+## ONLY USED BY BATTLE_MANAGER.ENTERSTATE
 func call_on_start_of_player_turn():
 	pass
 

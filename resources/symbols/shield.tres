@@ -1,7 +1,9 @@
-[gd_resource type="Resource" script_class="SymbolData" load_steps=3 format=3 uid="uid://ca3wcqralj3nx"]
+[gd_resource type="Resource" script_class="SymbolData" load_steps=5 format=3 uid="uid://ca3wcqralj3nx"]
 
 [ext_resource type="Script" uid="uid://dwxqiops6h6f5" path="res://resources/symbols/scripts/symbol_data.gd" id="1_jhtxi"]
+[ext_resource type="Script" uid="uid://br4wbcsqpd28y" path="res://resources/effects/effect.gd" id="1_ylhq3"]
 [ext_resource type="Texture2D" uid="uid://7u3uclj0fwe2" path="res://assets/slot_machine_symbols/shield-svgrepo-com.svg" id="2_gexcj"]
+[ext_resource type="Resource" uid="uid://blc5f0rfaluyl" path="res://resources/effects/player_+2_block_effect.tres" id="2_xv7f5"]
 
 [resource]
 script = ExtResource("1_jhtxi")
@@ -9,11 +11,7 @@ symbol_name = "Symbol"
 description = ""
 texture = ExtResource("2_gexcj")
 rarity = 0
-basic_effect_stat_name = Array[String](["current_block"])
-basic_effect_stat_change_amount = Array[int]([2])
-basic_effect_target_type = Array[int]([1])
-special_effects = Dictionary[int, int]({})
-custom_effects = Dictionary[GDScript, int]({})
+effect_array = Array[ExtResource("1_ylhq3")]([ExtResource("2_xv7f5")])
 edition = 0
 apply_time = 1
 animation_duration = 0.3

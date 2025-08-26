@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="Effect" load_steps=2 format=3 uid="uid://blc5f0rfaluyl"]
+
+[ext_resource type="Script" uid="uid://br4wbcsqpd28y" path="res://resources/effects/effect.gd" id="1_agi0j"]
+
+[resource]
+script = ExtResource("1_agi0j")
+effect_name = "effect_name"
+description = ""
+type = 0
+target_type = 1
+stat_name = "current_block"
+stat_change_amount = 2
+animation_duration = 0.3
+metadata/_custom_type_script = "uid://br4wbcsqpd28y"

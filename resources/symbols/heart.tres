@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="SymbolData" load_steps=3 format=3 uid="uid://bouyqgd5u7ow6"]
+[gd_resource type="Resource" script_class="SymbolData" load_steps=4 format=3 uid="uid://bouyqgd5u7ow6"]
 
 [ext_resource type="Script" uid="uid://dwxqiops6h6f5" path="res://resources/symbols/scripts/symbol_data.gd" id="1_0tyqy"]
+[ext_resource type="Script" uid="uid://br4wbcsqpd28y" path="res://resources/effects/effect.gd" id="1_cmnsm"]
 [ext_resource type="Texture2D" uid="uid://wftsl8fdvnh6" path="res://assets/slot_machine_symbols/heart-svgrepo-com.svg" id="2_mny50"]
 
 [resource]
@@ -9,11 +10,7 @@ symbol_name = "Symbol"
 description = ""
 texture = ExtResource("2_mny50")
 rarity = 0
-basic_effect_stat_name = Array[String](["current_health"])
-basic_effect_stat_change_amount = Array[int]([5])
-basic_effect_target_type = Array[int]([1])
-special_effects = Dictionary[int, int]({})
-custom_effects = Dictionary[GDScript, int]({})
+effect_array = Array[ExtResource("1_cmnsm")]([])
 edition = 0
 apply_time = 1
 animation_duration = 0.3
