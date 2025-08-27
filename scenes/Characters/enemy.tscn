@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=3 uid="uid://bjo62yv2doddw"]
+[gd_scene load_steps=7 format=3 uid="uid://bjo62yv2doddw"]
 
 [ext_resource type="Script" uid="uid://bb3ufquxn4dcf" path="res://scenes/characters/enemy.gd" id="1_jbtib"]
 [ext_resource type="Texture2D" uid="uid://bb0d3y7l184lh" path="res://assets/bad_frog.png" id="2_wg2a8"]
 [ext_resource type="PackedScene" uid="uid://cnysvcqqidsea" path="res://scenes/ui/npc_battle_ui.tscn" id="3_f2e6v"]
 [ext_resource type="Script" uid="uid://5hrkx5odg553" path="res://scripts/intent_component.gd" id="4_21x0f"]
+[ext_resource type="Script" uid="uid://cginbmk2qlxim" path="res://scripts/level_component.gd" id="5_jgk6k"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_q03n0"]
 size = Vector2(135, 257)
@@ -25,3 +26,7 @@ texture = ExtResource("2_wg2a8")
 script = ExtResource("4_21x0f")
 owner_character = NodePath("..")
 metadata/_custom_type_script = "uid://5hrkx5odg553"
+
+[node name="LevelComponent" type="Node" parent="."]
+script = ExtResource("5_jgk6k")
+metadata/_custom_type_script = "uid://cginbmk2qlxim"

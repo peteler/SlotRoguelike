@@ -58,17 +58,12 @@ func initialize_from_player_data():
 	print("Player character initialized: ", player_data.character_name)
 
 func perform_basic_attack(target: Character):
-	target.take_basic_attack_damage(turn_attack)
+	target.take_damage(turn_attack)
 	can_attack = false
 
-## Override take_basic_attack_damage to add player-specific effects
-func take_damage(amount: int):
-	super.take_damage(amount)
-	# Add screen shake, damage effects, etc. here
-	add_damage_effect()
-
-func call_on_start_of_player_turn():
+func on_enter_player_roll():
 	can_attack = true
+	#reset previous turn stats
 	turn_attack = 0
 	current_block = 0
 

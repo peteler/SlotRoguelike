@@ -4,7 +4,7 @@ extends Node
 
 # main processing functions
 
-func process_symbols_in_sequence(symbols: Array[SymbolData], delay_between: float = 0.1):
+func process_symbols_in_sequence(symbols: Array[SymbolData]):
 	"""Process an array of symbols with proper timing and effects"""
 	
 	# Separate instant and delayed effects
@@ -29,27 +29,27 @@ func apply_symbol_effects(symbol: SymbolData):
 		effect.apply()
 	#TODO: add signal for vfx?
 
-#TODO:
-func apply_special_effect_to_target(effect: SymbolData.SPECIAL_EFFECT, target: Character):
-	"""Handle complex symbol effects by"""
-	match effect:
-		# TODO: maybe there's a better way?
-		_:
-			push_warning("Unknown special effect: ", effect)
-#TODO:
-func apply_custom_effect(effect: GDScript):
-	pass
-#TODO:
-func apply_custom_effect_to_target(effect: GDScript, target: Character):
-	pass
-
-# Utility functions
-
-func play_visual_effect(symbol: SymbolData):
-	"""Play visual effect for symbol"""
-	if symbol.visual_effect_scene:
-		var effect = symbol.visual_effect_scene.instantiate()
-		get_tree().current_scene.add_child(effect)
-		# Position effect appropriately
-		if effect.has_method("play"):
-			effect.play()
+##TODO:
+#func apply_special_effect_to_target(effect: SymbolData.SPECIAL_EFFECT, target: Character):
+	#"""Handle complex symbol effects by"""
+	#match effect:
+		## TODO: maybe there's a better way?
+		#_:
+			#push_warning("Unknown special effect: ", effect)
+##TODO:
+#func apply_custom_effect(effect: GDScript):
+	#pass
+##TODO:
+#func apply_custom_effect_to_target(effect: GDScript, target: Character):
+	#pass
+#
+## Utility functions
+#
+#func play_visual_effect(symbol: SymbolData):
+	#"""Play visual effect for symbol"""
+	#if symbol.visual_effect_scene:
+		#var effect = symbol.visual_effect_scene.instantiate()
+		#get_tree().current_scene.add_child(effect)
+		## Position effect appropriately
+		#if effect.has_method("play"):
+			#effect.play()

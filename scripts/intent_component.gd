@@ -5,10 +5,10 @@ extends Node
 
 signal intent_changed(character: Character, intent: Action, action_val: int, targets: Array)
 
-@export var owner_character: Character
+@export var owner_character: BattleNPC
 var current_intent: Action
 var current_action_val: int = 0
-var current_targets: Array[Character] = []
+var current_targets = []
 
 # Reference to the character's level component
 var level_component: LevelComponent
@@ -22,10 +22,11 @@ var action_weights: Array[int] = []  # Relative weights for action selection
 var action_cooldowns: Dictionary = {}  # Track cooldowns for each action
 var turns_since_last_special: int = 0
 
-func _ready():
-	# Get references to all variables
+func initialize(template: BattleNPCTemplate):
 	level_component = owner_character.get_node_or_null("LevelComponent")
 	possible_actions = owner_character.get_possible_actions()
+	for action in possible_actions:
+		action_cooldowns[action] = 0
 	action_weights = owner_character.get_possible_action_weights()
 
 func select_intent():
@@ -75,7 +76,8 @@ func calculate_current_intent_action_value() -> int:
 func get_current_intent_targets():
 	if current_intent and current_intent.target_type:
 		return GlobalBattle.get_targets_by_target_type(current_intent.target_type, owner_character)
-	return []
+	push_error("no current intent / no current_intent.target_type")
+
 
 func get_available_actions() -> Array[Action]:
 	"""Get actions that can be used this turn"""
@@ -134,7 +136,6 @@ func get_current_intent_data() -> Dictionary:
 		"targets": current_targets
 	}
 
-
 # --- action execution functions ---
 func execute_current_intent():
 	"""Execute the selected action"""
@@ -142,7 +143,7 @@ func execute_current_intent():
 		push_error("No intent selected for enemy turn!")
 		return
 	
-	print(owner_character.character_name + " uses " + current_intent.action_name)
+	print(owner_character , " uses " + current_intent.action_name)
 	
 	# Add visual delay for better game feel
 	await get_tree().create_timer(0.3).timeout
@@ -184,3 +185,11 @@ func update_current_intent():
 		
 		# signal for ui
 		intent_changed.emit(owner_character, current_intent, current_action_val, current_targets)
+
+func update_cooldowns():
+	"""Update action cooldowns at start of turn"""
+	for action in action_cooldowns:
+		if action_cooldowns[action] > 0:
+			action_cooldowns[action] -= 1
+	
+	turns_since_last_special += 1

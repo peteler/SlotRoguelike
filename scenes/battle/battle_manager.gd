@@ -72,7 +72,7 @@ func initialize_battle(encounter_data: EncounterData, player_data: PlayerData):
 	# Set up the encounter (enemies)
 	setup_encounter(encounter_data)
 	
-	
+
 	# Connect signals after everything is set up
 	setup_signals()
 	
@@ -175,7 +175,7 @@ func _on_character_died(character: Character):
 		enter_state(State.BATTLE_LOSE)
 		return
 
-func _on_slot_roll_completed(symbols: Array[SymbolData]):
+func _on_slot_roll_completed():
 	# This is called when the SlotMachine is done rolling.
 	# Make sure we are in the correct state to accept a roll.
 	if current_state != State.PLAYER_ROLL:
@@ -205,7 +205,7 @@ func enter_state(new_state: State):
 	current_state = new_state
 	print("Entering state: ", State.keys()[new_state]) # For debugging
 	
-	# Emit state change to global bus
+	# Emit state change to global bus 
 	Global.battle_state_changed.emit(State.keys()[new_state])
 
 	match new_state:
@@ -215,13 +215,6 @@ func enter_state(new_state: State):
 				slot_machine.enable_roll()
 			attack_button.disabled = true
 			end_turn_button.disabled = true
-			# spell_panel.hide() # for later
-
-			# init start of player's turn for player & enemies
-			player_character.call_on_start_of_player_turn()
-			for enemy in enemies_container.get_children():
-				if enemy is Enemy and enemy.is_alive():
-					enemy.call_on_start_of_player_turn()
 
 
 		State.PLAYER_ACTION:
@@ -288,8 +281,8 @@ func start_spell_targeting(spell: Spell):
 	# TODO: Highlight valid targets
 # --------------------------------------------------
 
+#TODO: move to an encounter class?
 # --- Encounter Setup Management ---
-
 func setup_encounter(encounter_data: EncounterData):
 	"""Set up the battle from encounter data"""
 	current_encounter = encounter_data
@@ -365,8 +358,8 @@ func get_default_spawn_position() -> Vector2:
 	return Vector2(600, 300)  # Adjust to your game's layout
 # --------------------------------------------------
 
+#TODO: move to a turn order class?
 # --- Enemy Turn Order System ---
-
 func setup_turn_order():
 	"""Establish the turn order for this encounter"""
 	var spawned_enemies = enemies_container.get_children()
@@ -407,7 +400,6 @@ func execute_enemy_turns():
 # --------------------------------------------------
 
 # --- Battle End Condition Functions ---
-
 func are_all_enemies_dead() -> bool:
 	"""Check if all enemies in the encounter are defeated"""
 	for enemy in enemies_container.get_children():

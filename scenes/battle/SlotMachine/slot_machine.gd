@@ -19,6 +19,17 @@ func _ready():
 	add_child(symbol_processor)
 	
 	roll_button.pressed.connect(_on_roll_button_pressed)
+	Global.battle_state_changed.connect(_on_battle_state_changed)
+
+func _on_battle_state_changed(state_name: String):
+	match state_name:
+		"PLAYER_ROLL":
+			on_enter_player_roll()
+		_:
+			return
+
+func on_enter_player_roll():
+	enable_roll()
 
 func enable_roll():
 	roll_button.disabled = false
@@ -78,8 +89,8 @@ func _on_roll_button_pressed():
 		await get_tree().create_timer(0.05).timeout
 
 	# 4. Process the symbols using the SymbolProcessor
-	await symbol_processor.process_symbols_in_sequence(symbols_rolled, 0.1)
+	await symbol_processor.process_symbols_in_sequence(symbols_rolled)
 	
 	# 5. Emit completion signal for BattleManager
-	Global.slot_roll_completed.emit(symbols_rolled)
+	Global.slot_roll_completed.emit()
 	print("Roll complete! Symbols_rolled: ", symbols_rolled)

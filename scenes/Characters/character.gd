@@ -29,6 +29,7 @@ func _ready():
 	# Connect the built-in Area2D signal to our targeting function
 	# already connected to player_characteR?
 	self.input_event.connect(_on_input_event)
+	Global.battle_state_changed.connect(_on_battle_state_changed)
 
 # --- Stats & UI initialization from character_template ---
 
@@ -117,9 +118,15 @@ func modify_property_by_amount(property_name: String, amount: int):
 	else:
 		push_error("Property '", property_name, "' does not exist on this object.")
 
-## @override OR should i use signals instead?
-## ONLY USED BY BATTLE_MANAGER.ENTERSTATE
-func call_on_start_of_player_turn():
+func _on_battle_state_changed(state_name: String):
+	match state_name:
+		"PLAYER_ROLL":
+			on_enter_player_roll()
+		_:
+			return
+
+## @override
+func on_enter_player_roll():
 	pass
 
 # --- Utility functions ---

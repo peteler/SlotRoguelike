@@ -24,7 +24,7 @@ signal action_executed(npc: BattleNPC, action: Action)
 signal level_changed(npc:BattleNPC)
 
 # Slot Machine Events
-signal slot_roll_completed(symbols: Array[SymbolData])
+signal slot_roll_completed()
 signal symbol_processing_started(symbol: SymbolData)
 signal symbol_processing_completed(symbol: SymbolData)
 signal symbol_effect_applied(symbol: SymbolData, target: Node)
