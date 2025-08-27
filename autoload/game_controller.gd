@@ -4,7 +4,7 @@ extends Node
 
 ## Scene paths 
 const BATTLE_SCENE = "res://scenes/battle/battle_manager.tscn"
-const MAP_SCENE = "res://scenes/map/map.tscn"
+const MAP_SCENE = "res://scenes/map/map_manager.tscn"
 const MAIN_MENU_SCENE = "res://scenes/main_menu.tscn"
 const VICTORY_SCREEN_SCENE = "res://scenes/battle/victory_screen.tscn"
 const DEFEAT_SCREEN_SCENE = "res://scenes/battle/defeat_screen.tscn"
@@ -17,6 +17,9 @@ var player_data: PlayerData
 
 ## Current game state
 var current_event: EventData
+
+# Map state persistence
+var map_manager: MapManager
 
 # ------------------------------------------
 
@@ -47,7 +50,14 @@ func start_new_game():
 
 	# Go to map
 	change_scene_to(MAP_SCENE)
-
+	
+	# Wait for the map scene to load, then initialize the map
+	await get_tree().process_frame
+	var map_scene_node = get_tree().current_scene
+	if map_scene_node:
+		map_manager = map_scene_node.get_node("MapManager")
+		if map_manager:
+			map_manager.start_new_map()	
 
 # --- Battle Management ---
 
@@ -80,7 +90,6 @@ func setup_battle_manager():
 		print("eventtype: ", current_event.event_type)
 		push_error("setup_battle_manager failed - missing battle_manager or wrong event type")
 
-
 # --- Signal Handlers ---
 
 func _on_battle_win():
@@ -98,7 +107,15 @@ func _on_return_to_map():
 	print("Game Controller: Returning to map")
 	change_scene_to(MAP_SCENE)
 	
-	# TODO: how to know where to return to? i need the map manager to remember all map related data
+	# Wait for the map scene to load, then restore the correct available nodes
+	await get_tree().process_frame
+	var map_scene_node = get_tree().current_scene
+	if map_scene_node:
+		map_manager = map_scene_node.get_node("MapManager")
+		if map_manager:
+			# This ensures the map remembers where you were and shows the correct next paths
+			map_manager.set_available_nodes_from_selection(map_manager.current_node_id)
+
 
 func _on_game_over():
 	"""Handle game over - reset and go to main menu"""

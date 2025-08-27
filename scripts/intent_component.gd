@@ -161,13 +161,12 @@ func execute_current_intent():
 	# Set cooldown
 	if current_intent.cooldown_turns > 0:
 		action_cooldowns[current_intent] = current_intent.cooldown_turns
-	
-	Global.enemy_action_executed.emit(self, current_intent)
+
 
 func attack_target(target: Character):
 	"""Deal damage to target"""
 	if target and current_action_val > 0:
-		target.take_basic_attack_damage(current_action_val)
+		target.take_damage(current_action_val)
 
 func give_block_to_target(target: Character):
 	"""Gain block"""

@@ -1,164 +1,109 @@
-## THIS IS THE CHANGE - Start ##
-# MapGenerator.gd - Procedural map generation
+# map_generator.gd
+# This script contains the logic for generating the map layout.
 class_name MapGenerator
 extends Node
 
-## Configuration
-@export var map_width: int = 1000
-@export var map_height: int = 600
-@export var horizontal_spacing: int = 150
-@export var vertical_spacing: int = 120
-@export var rows: int = 5  # Number of vertical layers
+# --- Configuration ---
+@export var num_rows: int = 10
+@export var nodes_per_row_min: int = 2
+@export var nodes_per_row_max: int = 4
+@export var extra_connection_probability: float = 0.3 # Chance for extra paths
 
-## Event distribution weights
-@export var encounter_weight: float = 0.7
-@export var shop_weight: float = 0.2
-@export var special_weight: float = 0.1
+# --- Event Data ---
+## for now it's exported, later on will be set by gamecontroller 
+@export var event_data_resources: Array[EventData]
 
-## Available events
-@export var encounter_events: Array[EncounterData]
-@export var shop_events: Array[EventData]  # You'll create these later
-@export var special_events: Array[EventData]  # You'll create these later
-
-func generate_map(difficulty: int = 1) -> Array:
-	"""Generate a procedural map with branching paths"""
-	var map_nodes = []
-	
-	# Create rows of events
-	for row in range(rows):
-		var row_nodes = generate_row(row, difficulty)
-		map_nodes.append(row_nodes)
-	
-	# Connect nodes between rows
-	connect_nodes(map_nodes)
-	
-	# Set starting node as available
-	if map_nodes.size() > 0 and map_nodes[0].size() > 0:
-		map_nodes[0][0].set_available(true)
-		map_nodes[0][0].set_current(true)
-	
-	return map_nodes
-
-func generate_row(row: int, difficulty: int) -> Array:
-	"""Generate a single row of events"""
-	var row_nodes = []
-	var node_count = calculate_row_node_count(row)
-	
-	for i in range(node_count):
-		var event_type = choose_event_type(row, difficulty)
-		var event_data = get_event_data(event_type, row, difficulty)
-		var position = calculate_node_position(row, i, node_count)
-		
-		var node = preload("res://scenes/map/event_node.tscn").instantiate()
-		node.setup(event_data, position)
-		node.set_available(false)  # Nodes start unavailable
-		
-		row_nodes.append(node)
-	
-	return row_nodes
-
-func calculate_row_node_count(row: int) -> int:
-	"""Calculate how many nodes should be in this row"""
-	# Middle rows have more nodes, creating branching paths
-	if row == 0:  # First row
-		return 1
-	elif row == rows - 1:  # Last row (boss)
-		return 1
-	elif row < rows / 2:  # First half - expanding
-		return 1 + row
-	else:  # Second half - contracting toward boss
-		return rows - row
-
-func choose_event_type(row: int, difficulty: int) -> EventData.EVENT_TYPE:
-	"""Choose an event type based on row and difficulty"""
-	# Early rows have more encounters, later rows have more variety
-	var weights = {
-		EventData.EVENT_TYPE.ENCOUNTER: encounter_weight,
-		# Add other types as you implement them
+# --- Generation Logic ---
+func generate_map_data() -> Dictionary:
+	"""
+	Generates the entire map structure with nodes and connections.
+	"""
+	var map_data = {
+		"rows": [],
+		"connections": []
 	}
 	
-	# Adjust weights based on row
-	if row > rows / 2:
-		weights[EventData.EVENT_TYPE.ENCOUNTER] *= 0.8
-		# Increase chance for special events in later rows
-	
-	# Choose based on weights
-	var total = 0.0
-	for weight in weights.values():
-		total += weight
-	
-	var random_value = randf() * total
-	var current = 0.0
-	
-	for event_type in weights.keys():
-		current += weights[event_type]
-		if random_value <= current:
-			return event_type
-	
-	return EventData.EVENT_TYPE.ENCOUNTER  # Fallback
-
-func get_event_data(event_type: EventData.EVENT_TYPE, row: int, difficulty: int) -> EventData:
-	"""Get a specific event data based on type and row"""
-	match event_type:
-		EventData.EVENT_TYPE.ENCOUNTER:
-			return get_encounter_data(row, difficulty)
-		# Add other event types as you implement them
-		_:
-			return encounter_events[0]  # Fallback
-
-func get_encounter_data(row: int, difficulty: int) -> EncounterData:
-	"""Get an appropriate encounter for this row and difficulty"""
-	# Filter encounters by difficulty
-	var available_encounters = encounter_events.filter(
-		func(e): return e.difficulty <= difficulty + row
-	)
-	
-	if available_encounters.is_empty():
-		return encounter_events[0]
-	
-	return available_encounters[randi() % available_encounters.size()]
-
-func calculate_node_position(row: int, index: int, total_in_row: int) -> Vector2:
-	"""Calculate position for a node in the map"""
-	var x = (index + 1) * (map_width / (total_in_row + 1))
-	var y = (row + 1) * vertical_spacing
-	return Vector2(x, y)
-
-func connect_nodes(map_nodes: Array):
-	"""Connect nodes between rows with appropriate branching"""
-	for row in range(map_nodes.size() - 1):
-		var current_row = map_nodes[row]
-		var next_row = map_nodes[row + 1]
+	# Create nodes for each row
+	for i in range(num_rows):
+		var row_nodes = create_row_nodes(i)
+		map_data.rows.append(row_nodes)
 		
-		# Connect each node to 1-3 nodes in the next row
-		for i in range(current_row.size()):
-			var node = current_row[i]
-			var connections = calculate_connections(i, current_row.size(), next_row.size())
+	# Create connections between rows
+	for i in range(num_rows - 1):
+		# Ensure the map is fully connected and playable
+		var connections = create_guaranteed_connections(map_data.rows[i], map_data.rows[i+1])
+		map_data.connections.append_array(connections)
+		
+	return map_data
+
+func create_row_nodes(row_index: int) -> Array:
+	"""
+	Creates the nodes for a single row.
+	"""
+	var row_nodes = []
+	var num_nodes = randi_range(nodes_per_row_min, nodes_per_row_max)
+	
+	for i in range(num_nodes):
+		var event_data = select_random_event_data(row_index)
+		# Generate a unique ID for each node based on its position
+		var node_id = "node_%d_%d" % [row_index, i]
+		var node = {
+			"id": node_id,
+			"row": row_index,
+			"col": i,
+			"event_data": event_data
+		}
+		row_nodes.append(node)
+		
+	return row_nodes
+
+func select_random_event_data(row_index: int) -> EventData:
+	"""
+	Selects a random event data resource suitable for the given row.
+	"""
+	var valid_events = []
+	for event in event_data_resources:
+		if row_index >= event.min_row and row_index <= event.max_row:
+			valid_events.append(event)
 			
-			for connection_index in connections:
-				if connection_index >= 0 and connection_index < next_row.size():
-					node.add_connection(next_row[connection_index])
-
-func calculate_connections(current_index: int, current_count: int, next_count: int) -> Array:
-	"""Calculate which nodes in the next row this node should connect to"""
-	var connections = []
-	
-	# Simple connection logic - can be enhanced for more interesting maps
-	if next_count == 1:
-		connections.append(0)  # Single connection
+	if not valid_events.is_empty():
+		return valid_events.pick_random()
 	else:
-		# Connect to nearby nodes
-		var ratio = float(current_index) / (current_count - 1) if current_count > 1 else 0.5
-		var target_index = int(ratio * (next_count - 1))
-		
-		connections.append(target_index)
-		
-		# Sometimes add an additional connection for branching
-		if randf() < 0.3 and next_count > 1:
-			var alternate = target_index + (1 if target_index == 0 else -1)
-			alternate = clamp(alternate, 0, next_count - 1)
-			if alternate != target_index:
-				connections.append(alternate)
+		# Fallback in case no events are valid for the row
+		push_warning("No valid event data found for row " + str(row_index) + ". Using a random one.")
+		return event_data_resources.pick_random()
+
+func create_guaranteed_connections(from_row: Array, to_row: Array) -> Array:
+	"""
+	Creates connections between two rows, ensuring every node is part of a path.
+	This prevents dead ends and orphaned nodes.
+	"""
+	var connections = []
+	var to_nodes_connected = {} # Using a dictionary to track connected 'to' nodes
 	
+	# 0. Ensure every to_node starts as not_connected
+	for node in to_row: 
+		to_nodes_connected[node.id] = false
+
+	# 1. Ensure every 'from_node' has at least one connection going forward.
+	for from_node in from_row:
+		var target_node = to_row.pick_random()
+		connections.append({"from": from_node.id, "to": target_node.id})
+		to_nodes_connected[target_node.id] = true
+
+	# 2. Ensure every 'to_node' has at least one connection coming from behind.
+	for to_node_id in to_nodes_connected:
+		if not to_nodes_connected[to_node_id]:
+			var source_node = from_row.pick_random()
+			connections.append({"from": source_node.id, "to": to_node_id})
+
+	# 3. Add some extra random connections for more branching paths.
+	for from_node in from_row:
+		for to_node in to_row:
+			if randf() < extra_connection_probability:
+				# Check if connection already exists to avoid duplicates
+				var existing = connections.filter(func(c): return c.from == from_node.id and c.to == to_node.id)
+				if existing.is_empty():
+					connections.append({"from": from_node.id, "to": to_node.id})
+
 	return connections
-## THIS IS THE CHANGE - End ##

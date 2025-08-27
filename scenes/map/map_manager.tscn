@@ -1,0 +1,19 @@
+[gd_scene load_steps=7 format=3 uid="uid://dgcmghqh8uyg3"]
+
+[ext_resource type="Script" uid="uid://dvoeduobv2tne" path="res://scenes/map/map_manager.gd" id="1_75h61"]
+[ext_resource type="Script" uid="uid://dxd0pufqhyle0" path="res://scenes/map/map_generator.gd" id="1_wqvcw"]
+[ext_resource type="Script" uid="uid://bl1j38skun7nk" path="res://resources/events/event_data.gd" id="2_7dvyr"]
+[ext_resource type="Script" uid="uid://dp4nj8whqkt30" path="res://scenes/map/map_view.gd" id="2_e0lot"]
+[ext_resource type="Resource" uid="uid://b7piwl53m72hw" path="res://resources/events/encounters/test_encounter.tres" id="3_75h61"]
+[ext_resource type="PackedScene" uid="uid://tokicvkn1u4l" path="res://scenes/map/event_node.tscn" id="6_lcodj"]
+
+[node name="MapManager" type="Node"]
+script = ExtResource("1_75h61")
+
+[node name="MapGenerator" type="Node" parent="."]
+script = ExtResource("1_wqvcw")
+event_data_resources = Array[ExtResource("2_7dvyr")]([ExtResource("3_75h61")])
+
+[node name="MapView" type="Node2D" parent="."]
+script = ExtResource("2_e0lot")
+event_node_scene = ExtResource("6_lcodj")

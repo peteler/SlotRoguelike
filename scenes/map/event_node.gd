@@ -1,12 +1,14 @@
-# EventNode.gd - Simple event node for MVP
+# event_node.gd
+# Modified to store its own ID.
 class_name EventNode
 extends Button
 
 ## Event data this node represents
 var event_data: EventData
+var node_id: String # Unique identifier for this node
 
 ## State tracking
-var is_available: bool = true
+var is_available: bool = false # Start as unavailable by default
 var is_completed: bool = false
 
 func _ready():
@@ -16,8 +18,9 @@ func _ready():
 	# Set initial appearance
 	update_appearance()
 
-func setup(event_data_ref: EventData, pos: Vector2):
+func setup(id: String, event_data_ref: EventData, pos: Vector2):
 	"""Initialize the event node with data and position"""
+	node_id = id
 	event_data = event_data_ref
 	position = pos
 	
@@ -26,10 +29,13 @@ func setup(event_data_ref: EventData, pos: Vector2):
 		match event_data.event_type:
 			EventData.EVENT_TYPE.ENCOUNTER:
 				text = "Battle"
+			EventData.EVENT_TYPE.SHOP:
+				text = "Shop"
+			EventData.EVENT_TYPE.REST:
+				text = "Rest"
 			_:
 				text = "Unknown"
 				push_warning("Unhandled event type: " + str(event_data.event_type))
-
 	
 	update_appearance()
 
@@ -53,9 +59,11 @@ func set_available(available: bool):
 func set_completed(completed: bool):
 	"""Mark this event as completed"""
 	is_completed = completed
+	is_available = false # A completed node can no longer be available
 	update_appearance()
 
 func _on_pressed():
 	"""Handle node click"""
 	if is_available and not is_completed:
+		# Emit a reference to itself so the manager knows which node was clicked
 		Global.event_node_selected.emit(self)
