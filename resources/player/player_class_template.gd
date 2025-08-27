@@ -1,4 +1,4 @@
-# PlayerClassData.gd - Static, unchanging player class definition
+# PlayerClassTemplate.gd - Static, unchanging player class definition
 # A factory for creating a fresh "character sheet" [player_data] at the start of a run.
 @tool
 class_name PlayerClassTemplate

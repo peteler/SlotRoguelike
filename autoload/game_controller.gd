@@ -10,7 +10,7 @@ const VICTORY_SCREEN_SCENE = "res://scenes/battle/victory_screen.tscn"
 const DEFEAT_SCREEN_SCENE = "res://scenes/battle/defeat_screen.tscn"
 
 ## Class paths
-var test_class: PlayerClassData = load("res://resources/player/player_classes/test_player_class.tres")
+var test_class: PlayerClassTemplate = load("res://resources/player/player_classes/test_player_class.tres")
 
 ## Player reference: DATA PERSISTS! SCENES GET DESTROYED, that's why playerdata and not playercharacter
 var player_data: PlayerData
@@ -128,21 +128,21 @@ func load_game():
 	# TODO: Implement save system
 	pass
 
-func create_new_player_data_from_class_data(class_data: PlayerClassData) -> PlayerData:
+func create_new_player_data_from_class_data(class_template: PlayerClassTemplate) -> PlayerData:
 	"""Create a new PlayerData with this class's starting values"""
 	var new_player_data = PlayerData.new()
 	
 	# Copy class data to player data
-	new_player_data.class_data = class_data
-	new_player_data.max_health = class_data.max_health
-	new_player_data.current_health = class_data.max_health
+	new_player_data.class_template = class_template
+	new_player_data.max_health = class_template.max_health
+	new_player_data.current_health = class_template.max_health
 	
 	# Set starting resources
-	new_player_data.symbol_pool = class_data.symbol_pool.duplicate(true)
-	new_player_data.current_mana = class_data.starting_mana
-	new_player_data.max_mana = class_data.max_mana
-	new_player_data.mana_per_turn = class_data.mana_per_turn
-	new_player_data.gold = class_data.gold
+	new_player_data.symbol_pool = class_template.symbol_pool.duplicate(true)
+	new_player_data.current_mana = class_template.starting_mana
+	new_player_data.max_mana = class_template.max_mana
+	new_player_data.mana_per_turn = class_template.mana_per_turn
+	new_player_data.gold = class_template.gold
 	
 	
 	return new_player_data

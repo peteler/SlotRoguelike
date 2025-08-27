@@ -14,6 +14,26 @@ func _ready():
 	Global.character_block_updated.connect(_on_character_block_updated)
 	Global.character_health_updated.connect(_on_character_health_updated)
 
+# In character_battle_ui.gd
+
+func initialize(character_template: CharacterTemplate, parent_sprite: Sprite2D):
+	# This logic is MOVED FROM Character.gd's init_character_battle_ui
+	var sprite_rect = parent_sprite.get_rect()
+	var anchor_pos = character_template.get_anchor_position(character_template.battle_ui_anchor, sprite_rect)
+	
+	# The UI positions itself
+	self.position = anchor_pos + character_template.battle_ui_offset
+	self.scale = character_template.battle_ui_scale
+	
+	# The UI positions its own children
+	var health_bar = get_node_or_null("HealthBar")
+	if health_bar:
+		health_bar.position = character_template.health_bar_local_offset
+
+	var block_display = get_node_or_null("BlockDisplay")
+	if block_display:
+		block_display.position = character_template.block_display_local_offset
+
 func _on_character_block_updated(updated_character: Character, block: int):
 	# Only update if this is our character
 	print("Signal received for block update. Character: ", updated_character.name, ", block: ", block)

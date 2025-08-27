@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="EnemyAction" load_steps=3 format=3 uid="uid://c0h8f2vxfv2t4"]
+[gd_resource type="Resource" script_class="Action" load_steps=3 format=3 uid="uid://c0h8f2vxfv2t4"]
 
 [ext_resource type="Texture2D" uid="uid://b3cgae1xahvhy" path="res://icon.svg" id="1_4rk35"]
 [ext_resource type="Script" uid="uid://dunxuqfq6wbsu" path="res://resources/enemies/enemy_action.gd" id="1_71lad"]

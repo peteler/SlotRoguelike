@@ -1,27 +1,24 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=7 format=3 uid="uid://oa74dl07qe80"]
+[gd_resource type="Resource" script_class="EnemyTemplate" load_steps=7 format=3 uid="uid://oa74dl07qe80"]
 
 [ext_resource type="Texture2D" uid="uid://bb0d3y7l184lh" path="res://assets/bad_frog.png" id="1_12onl"]
 [ext_resource type="Script" uid="uid://dunxuqfq6wbsu" path="res://resources/enemies/enemy_action.gd" id="2_27c08"]
 [ext_resource type="Resource" uid="uid://c0h8f2vxfv2t4" path="res://resources/enemies/EnemyActionResources/basic_attack.tres" id="3_27c08"]
-[ext_resource type="Script" uid="uid://d2qm6v54ljiyl" path="res://resources/enemies/enemy_data.gd" id="3_hmm64"]
+[ext_resource type="Script" uid="uid://d2qm6v54ljiyl" path="res://resources/enemies/enemy_template.gd" id="3_hmm64"]
 [ext_resource type="Resource" uid="uid://j58p7d8e424d" path="res://resources/enemies/EnemyActionResources/double_damage_basic_attack.tres" id="3_upxd1"]
 [ext_resource type="Script" uid="uid://dwxqiops6h6f5" path="res://resources/symbols/scripts/symbol_data.gd" id="4_lyes3"]
 
 [resource]
 script = ExtResource("3_hmm64")
+symbol_rewards = Array[ExtResource("4_lyes3")]([])
+reward_count = 1
 attack_level = 5
 block_level = 2
 heal_level = 0
 buff_level = 0
-ai_type = "aggressive"
-attack_frequency = 0.8
-special_ability_cooldown = 3
 possible_actions = Array[ExtResource("2_27c08")]([ExtResource("3_27c08"), ExtResource("3_upxd1")])
 action_weights = Array[int]([7, 3])
 intent_ui_offset = Vector2(-60, -5)
 intent_ui_anchor = "top_center"
-symbol_rewards = Array[ExtResource("4_lyes3")]([])
-reward_count = 1
 character_name = "bad frog"
 sprite = ExtResource("1_12onl")
 max_health = 30

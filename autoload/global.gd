@@ -18,10 +18,10 @@ signal character_block_updated(character: Character, block_amount: int)
 signal player_character_attack_updated(player_character: PlayerCharacter, attack_amount: int)
 signal player_mana_updated(current_mana: int) 
 
-# Enemy Specific Events
-signal enemy_intent_updated(enemy: Enemy, action: EnemyAction, action_val: int, action_targets: Array)
-signal enemy_action_executed(enemy: Enemy, action: EnemyAction)
-signal enemy_level_changed(enemy:Enemy)
+# BattleNPC Specific Events
+signal intent_updated(npc: BattleNPC, action: Action, action_val: int, action_targets: Array)
+signal action_executed(npc: BattleNPC, action: Action)
+signal level_changed(npc:BattleNPC)
 
 # Slot Machine Events
 signal slot_roll_completed(symbols: Array[SymbolData])

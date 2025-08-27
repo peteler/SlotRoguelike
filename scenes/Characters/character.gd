@@ -32,67 +32,22 @@ func _ready():
 
 # --- Stats & UI initialization from character_template ---
 
-## CALLED ONCE by specific characters for ui setup
+## CALLED ONCE by specific characters to initialize character basic stats
 ## INPUT: data is character_template OR player_data
 ## [difference is character_template is a static resource and player_data is dynamic save data]
-func init_character_battle_stats(data):
+func init_character_basic_battle_stats(data):
 	## init PlayerData & CharacterTemplate mutual stats
 	max_health = data.max_health
 	current_health = max_health
 	current_block = data.start_of_encounter_block
 
-func init_character_battle_ui(character_template: CharacterTemplate, battle_ui: CharacterBattleUI):
-	"""
-	Applies UI placement configuration from CharacterTemplate.
-	Called once by the spceific character.
-	"""
-	
+func init_character_sprite_and_collision(character_template: CharacterTemplate):
 	if sprite and character_template.sprite:
 		sprite.texture = character_template.sprite
-	
-	if not character_template or not sprite:
-		push_error("Missing CharacterTemplate or Sprite2D for UI placement!")
-		return
 	
 	# Apply CollisionShape configuration
 	if collision_shape:
 		setup_collision_shape(character_template)
-		
-	# Get the sprite's bounding box in its local coordinate system.
-	var sprite_rect = sprite.get_rect()
-	# Apply Stats UI placement
-	if battle_ui:
-		# Get the anchor position relative to the sprite's local coordinates.
-		var anchor_pos = character_template.get_anchor_position(character_template.battle_ui_anchor, sprite_rect)
-		
-		# The battle UI is a child of the character node, so its position is relative to the character.
-		# This positioning is correct for a UI node placed as a sibling to the Sprite2D.
-		battle_ui.position = anchor_pos + character_template.battle_ui_offset
-		battle_ui.scale = character_template.battle_ui_scale
-		
-		print("battle UI positioned at: ", battle_ui.position, " (anchor: ", character_template.battle_ui_anchor, ")")
-	
-	# Setup individual UI components within battleUI
-	setup_battle_ui_components(character_template, battle_ui)
-
-# --- ui initialization helpers ---
-
-func setup_battle_ui_components(character_template: CharacterTemplate, battle_ui: CharacterBattleUI):
-	"""Position individual components within the battleUI"""
-	if not battle_ui:
-		return
-	
-	# Find health bar component
-	var health_bar = battle_ui.get_node_or_null("HealthBar")
-	if health_bar:
-		health_bar.position = character_template.health_bar_local_offset
-
-	# Find block display component
-	var block_display = battle_ui.get_node_or_null("BlockDisplay")
-	if block_display:
-		block_display.position = character_template.block_display_local_offset
-	
-	print("Configured UI components with local offsets")
 
 func setup_collision_shape(character_template: CharacterTemplate):
 	"""Setup collision shape based on character data"""
@@ -138,7 +93,7 @@ func create_default_collision(sprite_node: Sprite2D, character_template: Charact
 	collision_shape.scale = character_template.collision_scale
 
 # --- Core Combat Functions ---
-func take_basic_attack_damage(amount: int):
+func take_damage(amount: int):
 	if amount <= 0: return
 
 	var damage_to_block = min(current_block, amount)
@@ -162,7 +117,7 @@ func modify_property_by_amount(property_name: String, amount: int):
 	else:
 		push_error("Property '", property_name, "' does not exist on this object.")
 
-## @override
+## @override OR should i use signals instead?
 ## ONLY USED BY BATTLE_MANAGER.ENTERSTATE
 func call_on_start_of_player_turn():
 	pass

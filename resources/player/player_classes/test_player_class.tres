@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="PlayerClassData" load_steps=6 format=3 uid="uid://cc88ufi7y3h1c"]
 
 [ext_resource type="Script" uid="uid://dwxqiops6h6f5" path="res://resources/symbols/scripts/symbol_data.gd" id="1_gml3a"]
-[ext_resource type="Script" uid="uid://ctfn7l7j5y8ja" path="res://resources/player/player_class_data.gd" id="2_lioom"]
+[ext_resource type="Script" uid="uid://ctfn7l7j5y8ja" path="res://resources/player/player_class_template.gd" id="2_lioom"]
 [ext_resource type="Script" uid="uid://4r47thkv03ex" path="res://resources/spells/spell.gd" id="3_48xu3"]
 [ext_resource type="Texture2D" uid="uid://df4g1o71vmqrl" path="res://assets/Knight.png" id="5_8vvn5"]
 [ext_resource type="Resource" uid="uid://dkhuarj60r2hp" path="res://resources/player/player_classes/test_class_symbol_pool.tres" id="5_w27s4"]

@@ -6,7 +6,7 @@
 
 [resource]
 script = ExtResource("2_qs6n3")
-enemy_data = ExtResource("1_qs6n3")
+enemy_template = ExtResource("1_qs6n3")
 spawn_point_name = "mid"
 spawn_offset = Vector2(0, 0)
 health_multiplier = 1.0

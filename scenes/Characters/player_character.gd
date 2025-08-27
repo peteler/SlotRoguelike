@@ -21,8 +21,8 @@ var turn_attack: int = 0:
 		turn_attack = value
 		Global.player_character_attack_updated.emit(self, turn_attack)
 
-## Player character data resource
-@export var player_data: PlayerData
+## Player dynamic save data
+var player_data: PlayerData
 
 @onready var battle_ui: PlayerCharacterBattleUI = $PlayerCharacterBattleUI
 
@@ -44,16 +44,13 @@ func _ready():
 
 func initialize_from_player_data():
 	"""Initialize player character from PlayerData resource"""
-	# init base character stats
-	init_character_battle_stats(player_data)
-	# init battle_ui based on CharacterTemplate
-	init_character_battle_ui(player_data.class_data, battle_ui)
+	# init base character stats & nodes
+	init_character_basic_battle_stats(player_data)
+	var class_template = player_data.class_template
+	init_character_sprite_and_collision(class_template)
 	
-	# initialize player-specific battle ui
-	var attack_display = battle_ui.get_node_or_null("AttackDisplay")
-	if attack_display:
-		print("attack_display present")
-		battle_ui.attack_display.position = player_data.class_data.attack_display_local_offset
+	# init battle_ui based on CharacterTemplate & sprite
+	battle_ui.initialize(class_template, sprite)
 	
 	# initialize player-specific stats
 	current_mana = player_data.current_mana
@@ -65,8 +62,8 @@ func perform_basic_attack(target: Character):
 	can_attack = false
 
 ## Override take_basic_attack_damage to add player-specific effects
-func take_basic_attack_damage(amount: int):
-	super.take_basic_attack_damage(amount)
+func take_damage(amount: int):
+	super.take_damage(amount)
 	# Add screen shake, damage effects, etc. here
 	add_damage_effect()
 

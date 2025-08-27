@@ -106,7 +106,7 @@ func spawn_player_character(player_data: PlayerData):
 	# Position at spawn point
 	
 	if player_spawn:
-		var spawn_offset = player_data.class_data.spawn_offset
+		var spawn_offset = player_data.class_template.spawn_offset
 		player_character.global_position = player_spawn.global_position + spawn_offset
 	
 	# Add to scene
@@ -159,7 +159,7 @@ func _on_character_died(character: Character):
 	# Handle character death and check for battle end conditions
 	if character is Enemy:
 		var enemy = character as Enemy
-		print("Enemy died: ", enemy.enemy_data.character_name)
+		print("Enemy died: ", enemy.enemy_template.character_name)
 		
 		# Remove dead enemy from turn order
 		if enemy in turn_order:
@@ -320,7 +320,7 @@ func spawn_enemies_from_encounter():
 
 func create_enemy_from_spawn(enemy_spawn: EnemySpawn) -> Enemy:
 	"""Create an enemy instance from spawn configuration"""
-	if not enemy_scene or not enemy_spawn.enemy_data:
+	if not enemy_scene or not enemy_spawn.enemy_template:
 		push_error("Missing enemy scene or enemy data")
 		return null
 	
@@ -331,7 +331,7 @@ func create_enemy_from_spawn(enemy_spawn: EnemySpawn) -> Enemy:
 		return null
 	
 	# Set basic data
-	enemy_instance.enemy_data = enemy_spawn.enemy_data
+	enemy_instance.enemy_template = enemy_spawn.enemy_template
 	
 	# Apply position
 	var spawn_position = get_spawn_position(enemy_spawn)

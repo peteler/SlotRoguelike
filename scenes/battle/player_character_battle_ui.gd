@@ -30,6 +30,16 @@ func _ready():
 	if not player_character:
 		push_error("PlayerCharacterBattleUI must be a direct child of an Enemy node.")
 
+## overrides parent intialize
+func initialize(character_template: CharacterTemplate, parent_sprite: Sprite2D):
+	super.initialize(character_template, parent_sprite) # Call the parent function first!
+
+	var class_template = character_template as PlayerClassTemplate
+	if not class_template: return
+
+	if attack_display:
+		attack_display.position = class_template.attack_display_local_offset
+
 func _on_player_character_attack_updated(updated_character: PlayerCharacter, attack: int):
 	# Only update if this is our character
 	if updated_character == player_character:

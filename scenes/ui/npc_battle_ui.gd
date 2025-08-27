@@ -1,5 +1,5 @@
 # PlayerCharacterBattleUI.gd
-class_name EnemyBattleUI
+class_name NPCBattleUI
 extends CharacterBattleUI
 
 ## parent vars
@@ -10,21 +10,35 @@ extends CharacterBattleUI
 @onready var intent_icon: TextureRect = $IntentDisplay/IntentIcon
 @onready var intent_label: Label = $IntentDisplay/IntentLabel
 
-var enemy: Enemy
+var npc: BattleNPC
 
 func _ready():
 	super._ready()
 	
 	# player_character specific signals: 
-	Global.enemy_intent_updated.connect(_on_enemy_intent_updated)
+	Global.intent_updated.connect(_on_intent_updated)
 	
-	enemy = get_parent() as Enemy
-	if not enemy:
-		push_error("EnemyBattleUI must be a direct child of an Enemy node.")
+	npc = get_parent() as BattleNPC
+	if not npc:
+		push_error("NPCBattleUI must be a direct child of an npc node.")
 
-func _on_enemy_intent_updated(updated_character: Enemy, intent: EnemyAction, action_val: int, action_targets: Array):
+# In enemy_battle_ui.gd
+
+func initialize(character_template: CharacterTemplate, parent_sprite: Sprite2D):
+	super.initialize(character_template, parent_sprite) # Call the parent function first!
+	
+	##TODO: add battleNPC_template for ui placement !!
+	# This logic is MOVED FROM Enemy.gd's init_intent_ui
+	var npc_template = character_template as BattleNPCTemplate
+	if not npc_template: return
+	
+	var sprite_rect = parent_sprite.get_rect()
+	var anchor_pos = npc_template.get_anchor_position(npc_template.intent_ui_anchor, sprite_rect)
+	intent_display.position = anchor_pos + npc_template.intent_ui_offset
+
+func _on_intent_updated(updated_npc: BattleNPC, intent: Action, action_val: int, action_targets: Array):
 	# Only update if this is our character
-	if updated_character == enemy and intent:
+	if updated_npc == npc and intent:
 		# Update the icon and text based on the new intent.
 		if intent.icon:
 			intent_icon.texture = intent.icon
@@ -37,13 +51,12 @@ func _on_enemy_intent_updated(updated_character: Enemy, intent: EnemyAction, act
 			var desired_size: Vector2 = original_size * scale_factor
 			## Set the custom minimum size to enforce the scaled-down dimensions
 			intent_icon.custom_minimum_size = desired_size
-			 
 			intent_icon.size_flags_horizontal = 0
 			intent_icon.size_flags_vertical = 0
 			intent_label.size_flags_vertical = 0
 
 		else:
-			# You might want a default "question mark" icon here
+			# might want a default "question mark" icon here
 			intent_icon.texture = null 
 
 		intent_label.text = str(action_val)
@@ -55,6 +68,6 @@ func _on_enemy_intent_updated(updated_character: Enemy, intent: EnemyAction, act
 		intent_display.visible = true
 		
 	
-	elif updated_character == enemy:
+	elif updated_npc == npc:
 		# Hide if the intent is cleared (e.g: after action execution)
 		intent_display.visible = false

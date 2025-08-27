@@ -1,18 +1,18 @@
 [gd_scene load_steps=4 format=3 uid="uid://cnysvcqqidsea"]
 
-[ext_resource type="Script" uid="uid://b8cuyi6lhoflc" path="res://scenes/ui/enemy_battle_ui.gd" id="1_y811w"]
-[ext_resource type="Texture2D" uid="uid://b3cgae1xahvhy" path="res://icon.svg" id="2_y811w"]
+[ext_resource type="Script" uid="uid://b8cuyi6lhoflc" path="res://scenes/ui/npc_battle_ui.gd" id="1_mqjqc"]
+[ext_resource type="Texture2D" uid="uid://b3cgae1xahvhy" path="res://icon.svg" id="2_1uecc"]
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_y811w"]
 
-[node name="EnemyBattleUI" type="Control"]
+[node name="NPCBattleUI" type="Control"]
 layout_mode = 3
 anchors_preset = 0
 offset_left = 221.0
 offset_top = 255.0
 offset_right = 261.0
 offset_bottom = 295.0
-script = ExtResource("1_y811w")
+script = ExtResource("1_mqjqc")
 
 [node name="IntentDisplay" type="HBoxContainer" parent="."]
 layout_mode = 0
@@ -21,7 +21,7 @@ offset_bottom = 40.0
 
 [node name="IntentIcon" type="TextureRect" parent="IntentDisplay"]
 layout_mode = 2
-texture = ExtResource("2_y811w")
+texture = ExtResource("2_1uecc")
 
 [node name="IntentLabel" type="Label" parent="IntentDisplay"]
 layout_mode = 2
