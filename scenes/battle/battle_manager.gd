@@ -37,12 +37,12 @@ var slot_machine: Node
 var player_character: PlayerCharacter
 
 ## Scene resources
-@export var player_character_scene: PackedScene = preload("res://scenes/characters/player_character.tscn")
-@export var slot_machine_scene: PackedScene = preload("res://scenes/battle/SlotMachine/slot_machine.tscn")
+var player_character_scene: PackedScene = preload("res://scenes/characters/player_character.tscn")
+var slot_machine_scene: PackedScene = preload("res://scenes/battle/SlotMachine/slot_machine.tscn")
 
 ## Encounter Management
-@export var current_encounter: EncounterData
-@export var enemy_scene: PackedScene = preload("res://scenes/characters/enemy.tscn")
+var current_encounter: EncounterData
+var enemy_scene: PackedScene = preload("res://scenes/characters/enemy.tscn")
 
 # Turn order management
 var turn_order: Array[Enemy] = []
@@ -222,7 +222,7 @@ func enter_state(new_state: State):
 			# Disable roll, enable actions.
 			if slot_machine:
 				slot_machine.disable_roll()
-			attack_button.disabled = (player_character.turn_attack <= 0) or (not player_character.can_attack)
+			attack_button.disabled = not player_character.can_attack()
 			end_turn_button.disabled = false
 			# spell_panel.show() # for later
 

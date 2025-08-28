@@ -24,8 +24,8 @@ func process_symbols_in_sequence(symbols: Array[SymbolData]):
 	Global.symbol_sequence_completed.emit(symbols)
 
 func apply_symbol_effects(symbol: SymbolData):
-	
 	for effect in symbol.effect_array:
+		print("effect processing: ", effect.effect_name)
 		effect.apply()
 	#TODO: add signal for vfx?
 

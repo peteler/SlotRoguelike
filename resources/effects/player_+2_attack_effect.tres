@@ -4,11 +4,11 @@
 
 [resource]
 script = ExtResource("1_e64un")
-effect_name = "effect_name"
+effect_name = "player_+2_attack_effect"
 description = ""
 type = 0
-target_type = 0
-stat_name = ""
-stat_change_amount = 0
+target_type = 1
+stat_name = "current_attack"
+stat_change_amount = 2
 animation_duration = 0.3
 metadata/_custom_type_script = "uid://br4wbcsqpd28y"

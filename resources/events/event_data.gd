@@ -15,7 +15,7 @@ enum EVENT_TYPE {
 @export var event_type: EVENT_TYPE
 
 # Map generation properties
-@export var min_row: int = 1           # Earliest row this can appear
+@export var min_row: int = 0           # Earliest row this can appear
 @export var max_row: int = 999         # Latest row this can appear  
 @export var difficulty: int = 1        # Difficulty level
 @export var is_final_event: bool = false  # Is this the final event of a map?

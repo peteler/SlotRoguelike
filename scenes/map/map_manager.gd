@@ -14,16 +14,41 @@ var current_node_id: String = ""
 func _ready():
 	# Connect to the global signal that an event node has been selected by the player
 	Global.event_node_selected.connect(_on_event_node_selected)
-	start_new_map()
-	
+
+## TODO: DELETE THIS ?
 func start_new_map():
 	"""
 	Generates and displays a new map.
 	"""
 	map_data = map_generator.generate_map_data()
 	map_view.display_map(map_data)
+	# Position the view on the starting nodes
+	map_view.initial_focus()
 	# Initially, only the first row of nodes is available
 	set_available_nodes_from_selection()
+
+func load_map_state(data: Dictionary, completed_ids: Array[String]):
+	"""
+	Displays an existing map from saved data and restores its state, including
+	which nodes have been completed and what the next available paths are.
+	"""
+	map_data = data
+	map_view.display_map(map_data)
+	map_view.initial_focus()
+	
+	# Mark all nodes that have been completed
+	for node_id in completed_ids:
+		var node = map_view.get_node_by_id(node_id)
+		if node:
+			node.set_completed(true)
+	
+	# Determine the last completed node to find the next available paths
+	var last_completed_id = ""
+	if not completed_ids.is_empty():
+		last_completed_id = completed_ids.back()
+		
+	current_node_id = last_completed_id
+	set_available_nodes_from_selection(current_node_id)
 
 func _on_event_node_selected(node: EventNode):
 	"""
@@ -50,6 +75,7 @@ func set_available_nodes_from_selection(selected_node_id: String = ""):
 	"""
 	Sets which nodes are available to the player based on the last node they selected.
 	"""
+	print("setting available nodes by current_node_id: ", selected_node_id)
 	if selected_node_id.is_empty():
 		# This is the start of the map. Make the first row available.
 		if not map_data.rows.is_empty():

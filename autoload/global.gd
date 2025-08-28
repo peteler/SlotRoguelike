@@ -19,7 +19,7 @@ signal player_character_attack_updated(player_character: PlayerCharacter, attack
 signal player_mana_updated(current_mana: int) 
 
 # BattleNPC Specific Events
-signal intent_updated(npc: BattleNPC, action: Action, action_val: int, action_targets: Array)
+signal intent_changed(character: Character, intent: Action, action_val: int, targets: Array)
 signal action_executed(npc: BattleNPC, action: Action)
 signal level_changed(npc:BattleNPC)
 

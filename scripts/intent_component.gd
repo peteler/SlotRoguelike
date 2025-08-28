@@ -3,7 +3,6 @@
 class_name IntentComponent
 extends Node
 
-signal intent_changed(character: Character, intent: Action, action_val: int, targets: Array)
 
 @export var owner_character: BattleNPC
 var current_intent: Action
@@ -45,7 +44,7 @@ func select_intent():
 	current_targets = get_current_intent_targets()
 	
 	# signals for ui change
-	intent_changed.emit(owner_character, current_intent, current_action_val, current_targets)
+	Global.intent_changed.emit(owner_character, current_intent, current_action_val, current_targets)
 
 func clear_intent():
 	"""Clear the current intent"""
@@ -54,7 +53,7 @@ func clear_intent():
 	current_targets = []
 	
 	# signals for ui change
-	intent_changed.emit(owner_character, current_intent, current_action_val, current_targets)
+	Global.intent_changed.emit(owner_character, current_intent, current_action_val, current_targets)
 
 func calculate_current_intent_action_value() -> int:
 	"""Calculate the action value based on character stats and action multiplier"""
@@ -77,7 +76,6 @@ func get_current_intent_targets():
 	if current_intent and current_intent.target_type:
 		return GlobalBattle.get_targets_by_target_type(current_intent.target_type, owner_character)
 	push_error("no current intent / no current_intent.target_type")
-
 
 func get_available_actions() -> Array[Action]:
 	"""Get actions that can be used this turn"""
@@ -162,7 +160,6 @@ func execute_current_intent():
 	if current_intent.cooldown_turns > 0:
 		action_cooldowns[current_intent] = current_intent.cooldown_turns
 
-
 func attack_target(target: Character):
 	"""Deal damage to target"""
 	if target and current_action_val > 0:
@@ -183,7 +180,7 @@ func update_current_intent():
 		current_action_val = calculate_current_intent_action_value()
 		
 		# signal for ui
-		intent_changed.emit(owner_character, current_intent, current_action_val, current_targets)
+		Global.intent_changed.emit(owner_character, current_intent, current_action_val, current_targets)
 
 func update_cooldowns():
 	"""Update action cooldowns at start of turn"""

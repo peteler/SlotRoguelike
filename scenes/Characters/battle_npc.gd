@@ -48,8 +48,7 @@ func finish_turn():
 	##TODO: replace this with a battleui function
 	if battle_ui and battle_ui.intent_display:
 		battle_ui.intent_display.visible = false
-	
-	
+
 	#TODO: update buff timers [if buffs last 3 turns this is where you update them]
 	
 	#TODO: Apply end-of-turn effects (DOT, buffs, etc.)

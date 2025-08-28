@@ -16,10 +16,10 @@ var current_mana: int = 0:
 		current_mana = max(0, value)
 		Global.player_mana_updated.emit(current_mana)
 
-var turn_attack: int = 0:
+var current_attack: int = 0:
 	set(value):
-		turn_attack = value
-		Global.player_character_attack_updated.emit(self, turn_attack)
+		current_attack = value
+		Global.player_character_attack_updated.emit(self, current_attack)
 
 ## Player dynamic save data
 var player_data: PlayerData
@@ -27,7 +27,7 @@ var player_data: PlayerData
 @onready var battle_ui: PlayerCharacterBattleUI = $PlayerCharacterBattleUI
 
 ## battle manager helper fields [should eventually be changed into a function if mechanic will be updated]
-var can_attack: bool = false
+var can_attack_var: bool = false
 
 ## functions
 func _ready():
@@ -58,14 +58,17 @@ func initialize_from_player_data():
 	print("Player character initialized: ", player_data.character_name)
 
 func perform_basic_attack(target: Character):
-	target.take_damage(turn_attack)
-	can_attack = false
+	target.take_damage(current_attack)
+	can_attack_var = false
 
 func on_enter_player_roll():
-	can_attack = true
+	can_attack_var = true
 	#reset previous turn stats
-	turn_attack = 0
+	current_attack = 0
 	current_block = 0
+
+func can_attack() -> bool:
+	return can_attack_var and current_attack > 0
 
 ## Art functions
 func add_damage_effect():

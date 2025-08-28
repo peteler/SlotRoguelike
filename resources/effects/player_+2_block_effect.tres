@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1_agi0j")
-effect_name = "effect_name"
+effect_name = "player_+2_block_effect"
 description = ""
 type = 0
 target_type = 1

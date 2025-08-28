@@ -1,0 +1,28 @@
+have some sort of limit on turns per encounter:
+why? 
+prevents stalling [allows for economy/ healing symbols]
+most solutions seem to improve rng feel - more chances to get that big hit instead of being threatened every turn
+
+
+1. limit number of rolls:
+	pros: 
+		simple
+		easier to balance
+		gives economic incentive to finish fights fast
+		
+	cons: 
+		uninteresting?
+		boss fights need to be different?
+		limits builds & strategy
+		makes block kinda useless?
+
+2. double enemy's level every turn:
+	pros: interesting
+	cons: 
+		too big of jumps between turns? 
+		hard to balance
+
+3. increase enemy attack and have them wait before attacking
+
+
+4. some mix of everything: start off weak and after a few turns double level every turn, based on enemy attribute !

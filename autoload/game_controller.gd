@@ -18,8 +18,9 @@ var player_data: PlayerData
 ## Current game state
 var current_event: EventData
 
-# Map state persistence
-var map_manager: MapManager
+# Map state persistence. This data lives in the singleton and survives scene changes.
+var game_map_data: Dictionary = {}
+var completed_node_ids: Array[String] = []
 
 # ------------------------------------------
 
@@ -48,16 +49,24 @@ func start_new_game():
 	if test_class:
 		player_data = create_new_player_data_from_class_data(test_class)
 
-	# Go to map
+	# Clear any previous map state to ensure a fresh start
+	game_map_data = {}
+	completed_node_ids = []
+
+	# Go to the map scene
 	change_scene_to(MAP_SCENE)
 	
-	# Wait for the map scene to load, then initialize the map
+	# Wait for the map scene to fully load, then tell it to generate a new map
 	await get_tree().process_frame
-	var map_scene_node = get_tree().current_scene
-	if map_scene_node:
-		map_manager = map_scene_node.get_node("MapManager")
-		if map_manager:
-			map_manager.start_new_map()	
+	await get_tree().process_frame
+	
+	var map_manager = get_tree().current_scene
+	if map_manager:
+		map_manager.start_new_map()
+		# Store the newly generated map data in this singleton so it persists
+		game_map_data = map_manager.map_data
+	else:
+		push_error("Failed to find MapManager after loading map scene in start_new_game")
 
 # --- Battle Management ---
 
@@ -107,15 +116,16 @@ func _on_return_to_map():
 	print("Game Controller: Returning to map")
 	change_scene_to(MAP_SCENE)
 	
-	# Wait for the map scene to load, then restore the correct available nodes
+	# Wait for the map scene to load, then restore its state from our persistent data
 	await get_tree().process_frame
-	var map_scene_node = get_tree().current_scene
-	if map_scene_node:
-		map_manager = map_scene_node.get_node("MapManager")
-		if map_manager:
-			# This ensures the map remembers where you were and shows the correct next paths
-			map_manager.set_available_nodes_from_selection(map_manager.current_node_id)
-
+	await get_tree().process_frame
+	
+	var map_manager = get_tree().current_scene
+	if map_manager:
+		# This ensures the map is re-drawn with the correct progress instead of creating a new one
+		map_manager.load_map_state(game_map_data, completed_node_ids)
+	else:
+		push_error("Failed to find MapManager after returning to map scene.")
 
 func _on_game_over():
 	"""Handle game over - reset and go to main menu"""
@@ -124,6 +134,14 @@ func _on_game_over():
 	change_scene_to(MAIN_MENU_SCENE)
 
 func _on_event_selected(event_data: EventData):
+	# Before leaving the map scene, we must save the ID of the node that was just completed.
+	var map_manager = get_tree().current_scene
+	if map_manager:
+		var new_completed_id = map_manager.current_node_id
+		# Add the new ID to our persistent list if it's not already there
+		if not completed_node_ids.has(new_completed_id):
+			completed_node_ids.append(new_completed_id)
+	
 	current_event = event_data
 	print("oneventselected, eventtype == encounter? ", event_data.event_type == EventData.EVENT_TYPE.ENCOUNTER)
 	match event_data.event_type:

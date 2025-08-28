@@ -16,7 +16,7 @@ func _ready():
 	super._ready()
 	
 	# player_character specific signals: 
-	Global.intent_updated.connect(_on_intent_updated)
+	Global.intent_changed.connect(_on_intent_changed)
 	
 	npc = get_parent() as BattleNPC
 	if not npc:
@@ -36,7 +36,7 @@ func initialize(character_template: CharacterTemplate, parent_sprite: Sprite2D):
 	var anchor_pos = npc_template.get_anchor_position(npc_template.intent_ui_anchor, sprite_rect)
 	intent_display.position = anchor_pos + npc_template.intent_ui_offset
 
-func _on_intent_updated(updated_npc: BattleNPC, intent: Action, action_val: int, action_targets: Array):
+func _on_intent_changed(updated_npc: BattleNPC, intent: Action, action_val: int, action_targets: Array):
 	# Only update if this is our character
 	if updated_npc == npc and intent:
 		# Update the icon and text based on the new intent.
